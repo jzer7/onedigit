@@ -129,7 +129,7 @@ def state_merge(state: List[Combo], extra: List[Combo], *, max_cost: int = 20):
             state[val2] = combo2
 
 
-def simulate(state: List = []) -> List[Combo]:
+def simulate(state: List = []) -> (List[Combo], int):
     """Take 1 round of simulation"""
 
     known = [s for s in state if s.exists()]
@@ -154,11 +154,9 @@ def simulate(state: List = []) -> List[Combo]:
             for op in "^":
                 updates += state_update(new_combos, combo_binary_operation(combo1, combo2, op))
 
-    print(f"[INFO] There were {updates} in this simulation step.")
-
     state_merge(state, new_combos)
 
-    return state
+    return state, updates
 
 
 def state_prune(state: List[Combo]) -> List[Combo]:
@@ -166,19 +164,27 @@ def state_prune(state: List[Combo]) -> List[Combo]:
     return [s for s in state if s.exists()]
 
 
-def demo():
-    steps = 10
+def demo(digit: int, max_number: int = 20, *, steps: int=10):
 
     # Prepare
-    state = setup_simulation(3, space=200)
+    state = setup_simulation(digit, space=max_number)
 
     # Run a few steps
     for step in range(1, steps + 1):
-        state = simulate(state)
+        state, updates = simulate(state)
+        if updates == 0:
+            print(f"Step {step} produced no new updates.")
+            break
+
+        print(f"Step {step} produced {updates} updates.")
 
     for c in state_prune(state):
         print(f"{c.value:>4} = {c.expr:<25}   [{c.cost}]")
 
 
 if __name__ == "__main__":
-    demo()
+
+    # Defaults
+    digit, max_number, steps = 3, 20, 10
+
+    demo(digit, max_number, steps=steps)
