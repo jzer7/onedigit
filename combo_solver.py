@@ -166,22 +166,19 @@ def state_prune(state: List[Combo]) -> List[Combo]:
     return [s for s in state if s.exists()]
 
 
-
-
-
-if __name__ == "__main__":
+def demo():
     steps = 10
 
     # Prepare
-    state = setup_simulation(3, space=20)
+    state = setup_simulation(3, space=200)
 
     # Run a few steps
     for step in range(1, steps + 1):
         state = simulate(state)
 
-        print("Step", step)
-        for c in state_prune(state):
-            print(c)
-
     for c in state_prune(state):
-        print("Combo for", c.value, '=', c.expr_simple, 'cost:',c.cost)
+        print(f"{c.value:>4} = {c.expr:<25}   [{c.cost}]")
+
+
+if __name__ == "__main__":
+    demo()
