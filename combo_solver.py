@@ -50,6 +50,8 @@ def combo_unary_operation(combo1: Combo, op: str) -> Combo:
         val = math.factorial(combo1.value)
         expr1 = f"({combo1.expr})!"
         expr2 = f"{combo1.value}!"
+    else:
+        raise Exception("bad operator:", op)
 
     return Combo(value=val, cost=cost, expr=expr1, expr_simple=expr2)
 
@@ -92,7 +94,7 @@ def combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
             expr2 = f"{combo1.value} ^ {combo2.value}"
 
         case _:
-            pass
+            raise Exception("bad operator:", op)
 
     return Combo(value=val, cost=cost, expr=expr1, expr_simple=expr2)
 
@@ -143,7 +145,7 @@ def simulate(state: List = []) -> List[Combo]:
             # Order is well defined:
             #   + and * are commutative
             #   / and - do not make sense if combo1 < combo2
-            for op in "+-*/":
+            for op in ["+", "-", "*", "/"]:
                 if combo1.value >= combo2.value:
                     updates += state_update(new_combos, combo_binary_operation(combo1, combo2, op))
 
