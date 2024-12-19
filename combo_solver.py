@@ -12,65 +12,89 @@ class Combo:
     value: int
     cost: int
     expr: str = ""
+    expr_simple: str = ""
 
     def exists(self) -> bool:
+        """Check if a solution exists to produce this value."""
         return self.cost < INF
 
+    def __repr__(self) -> str:
+        return f"Combo: {self.value} = {self.expr_simple}    [{self.cost}]"
+
+    def __lt__(self, other) -> int:
+        return self.value < other.value
+
+
 def setup_simulation(seed: int, space: int = 100) -> List:
+    """Build space for a simulation"""
+
     combos = [Combo(value=i, cost=INF) for i in range(space + 1)]
 
     # Set up the seed digit
-    combos[seed].expr = str(seed)
+    combos[seed].expr = combos[seed].expr_simple = str(seed)
     combos[seed].cost = 1
 
     # Allow an expression for `1`
     combos[1].expr = f"{seed}/{seed}"
+    combos[1].expr_simple = str(1)
     combos[1].cost = 2
 
     return combos
 
 
 def combo_unary_operation(combo1: Combo, op: str) -> Combo:
+    """Apply an operation on a single number."""
     cost = combo1.cost
 
     if op == "!":
         val = math.factorial(combo1.value)
-        expr = f"({combo1.expr})!"
+        expr1 = f"({combo1.expr})!"
+        expr2 = f"{combo1.value}!"
 
-    return Combo(value=val, cost=cost, expr=expr)
+    return Combo(value=val, cost=cost, expr=expr1, expr_simple=expr2)
 
 
 def combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
+    """Apply an operation on a pair of numbers."""
+
     cost = combo1.cost + combo2.cost
 
     match op:
         case "+":
             val = combo1.value + combo2.value
-            expr = f"({combo1.expr}) + ({combo2.expr})"
+            expr1 = f"({combo1.expr}) + ({combo2.expr})"
+            expr2 = f"{combo1.value} + {combo2.value}"
 
         case "-":
             val = combo1.value - combo2.value
-            expr = f"({combo1.expr}) - ({combo2.expr})"
+            expr1 = f"({combo1.expr}) - ({combo2.expr})"
+            expr2 = f"{combo1.value} - {combo2.value}"
 
         case "*":
             val = combo1.value * combo2.value
-            expr = f"({combo1.expr}) * ({combo2.expr})"
+            expr1 = f"({combo1.expr}) * ({combo2.expr})"
+            expr2 = f"{combo1.value} * {combo2.value}"
 
         case "/":
             if combo1.value % combo2.value != 0:
-                return Combo(value=0, expr="", cost=INF)
+                return Combo(value=0, expr="", expr_simple="", cost=INF)
 
             val = combo1.value // combo2.value
-            expr = f"({combo1.expr}) / ({combo2.expr})"
+            expr1 = f"({combo1.expr}) / ({combo2.expr})"
+            expr2 = f"{combo1.value} / {combo2.value}"
 
         case "^":
             if combo1.value <= 1 or combo2.value > 10:
-                return Combo(value=0, expr="", cost=INF)
+                return Combo(value=0, expr="", expr_simple="", cost=INF)
 
             val = combo1.value**combo2.value
-            expr = f"({combo1.expr}) ^ ({combo2.expr})"
+            expr1 = f"({combo1.expr}) ^ ({combo2.expr})"
+            expr2 = f"{combo1.value} ^ {combo2.value}"
 
-    return Combo(value=val, cost=cost, expr=expr)
+        case _:
+            pass
+
+    return Combo(value=val, cost=cost, expr=expr1, expr_simple=expr2)
 
 
 def state_update(state: List[Combo], candidate: Combo, *, max_cost: int = 20) -> bool:
@@ -158,4 +182,4 @@ if __name__ == "__main__":
             print(c)
 
     for c in state_prune(state):
-        print("Combo for", c.value, '=', c.expr, 'cost:',c.cost)
+        print("Combo for", c.value, '=', c.expr_simple, 'cost:',c.cost)
