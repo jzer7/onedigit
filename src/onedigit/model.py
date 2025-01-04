@@ -164,4 +164,3 @@ def simulate(state: List = []) -> tuple[List[Combo], int]:
 def state_prune(state: List[Combo]) -> List[Combo]:
     """Remove combinations without a solution."""
     return [s for s in state if s.exists()]
-

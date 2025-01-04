@@ -1,0 +1,19 @@
+{
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/pdm.lock": true,
+       "**/.pdm-build": true,
+        "**/.pdm-python": true,
+        "**/.ruff_cache": true,
+        "**/.venv": true,
+        "**/*.swp": true
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "modifications",
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    }
+}
