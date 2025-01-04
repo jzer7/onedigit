@@ -1,0 +1,11 @@
+[project]
+name = "onedigit"
+version = "0.1.0"
+description = "Arithmetic puzzle"
+authors = [
+    {name = "Juan Rubio", email = "jcrubio@gmail.com"},
+]
+dependencies = []
+requires-python = ">=3.13"
+readme = "README.md"
+license = {text = "MIT"}

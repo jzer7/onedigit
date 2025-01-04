@@ -9,6 +9,8 @@ INF = 10**9
 
 @dataclass
 class Combo:
+    """A class that represents a combination that produces a value."""
+
     value: int
     cost: int
     expr: str = ""
@@ -25,7 +27,7 @@ class Combo:
         return self.value < other.value
 
 
-def setup_simulation(seed: int, space: int = 100) -> List:
+def setup_simulation(seed: int, space: int = 100) -> List[Combo]:
     """Build space for a simulation"""
 
     combos = [Combo(value=i, cost=INF) for i in range(space + 1)]
@@ -129,7 +131,7 @@ def state_merge(state: List[Combo], extra: List[Combo], *, max_cost: int = 20):
             state[val2] = combo2
 
 
-def simulate(state: List = []) -> (List[Combo], int):
+def simulate(state: List = []) -> tuple[List[Combo], int]:
     """Take 1 round of simulation"""
 
     known = [s for s in state if s.exists()]
