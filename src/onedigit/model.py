@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List
 import math
 
-INF = 10**9
+_INF = 10**9
 
 
 @dataclass
@@ -18,7 +18,7 @@ class Combo:
 
     def exists(self) -> bool:
         """Check if a solution exists to produce this value."""
-        return self.cost < INF
+        return self.cost < _INF
 
     def __repr__(self) -> str:
         return f"Combo: {self.value} = {self.expr_simple}    [{self.cost}]"
@@ -30,7 +30,7 @@ class Combo:
 def setup_simulation(seed: int, space: int = 100) -> List[Combo]:
     """Build space for a simulation"""
 
-    combos = [Combo(value=i, cost=INF) for i in range(space + 1)]
+    combos = [Combo(value=i, cost=_INF) for i in range(space + 1)]
 
     # Set up the seed digit
     combos[seed].expr = combos[seed].expr_simple = str(seed)
@@ -44,7 +44,7 @@ def setup_simulation(seed: int, space: int = 100) -> List[Combo]:
     return combos
 
 
-def combo_unary_operation(combo1: Combo, op: str) -> Combo:
+def _combo_unary_operation(combo1: Combo, op: str) -> Combo:
     """Apply an operation on a single number."""
     cost = combo1.cost
 
@@ -58,7 +58,7 @@ def combo_unary_operation(combo1: Combo, op: str) -> Combo:
     return Combo(value=val, cost=cost, expr=expr1, expr_simple=expr2)
 
 
-def combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
+def _combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
     """Apply an operation on a pair of numbers."""
 
     cost = combo1.cost + combo2.cost
@@ -81,7 +81,7 @@ def combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
 
         case "/":
             if combo1.value % combo2.value != 0:
-                return Combo(value=0, expr="", expr_simple="", cost=INF)
+                return Combo(value=0, expr="", expr_simple="", cost=_INF)
 
             val = combo1.value // combo2.value
             expr1 = f"({combo1.expr}) / ({combo2.expr})"
@@ -89,7 +89,7 @@ def combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
 
         case "^":
             if combo1.value <= 1 or combo2.value > 10:
-                return Combo(value=0, expr="", expr_simple="", cost=INF)
+                return Combo(value=0, expr="", expr_simple="", cost=_INF)
 
             val = combo1.value**combo2.value
             expr1 = f"({combo1.expr}) ^ ({combo2.expr})"
@@ -149,12 +149,12 @@ def simulate(state: List = []) -> tuple[List[Combo], int]:
             #   / and - do not make sense if combo1 < combo2
             for op in ["+", "-", "*", "/"]:
                 if combo1.value >= combo2.value:
-                    updates += state_update(new_combos, combo_binary_operation(combo1, combo2, op))
+                    updates += state_update(new_combos, _combo_binary_operation(combo1, combo2, op))
 
             # Order is important:
             #   ^
             for op in "^":
-                updates += state_update(new_combos, combo_binary_operation(combo1, combo2, op))
+                updates += state_update(new_combos, _combo_binary_operation(combo1, combo2, op))
 
     state_merge(state, new_combos)
 
