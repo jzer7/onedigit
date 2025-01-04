@@ -41,6 +41,15 @@ def setup_simulation(seed: int, space: int = 100) -> List[Combo]:
     combos[1].expr_simple = str(1)
     combos[1].cost = 2
 
+    # Allow expressions for joint digits (say, 22, two 2s)
+    if 1 <= seed <= 9:
+        num, expr, cost = seed, str(seed), 1
+        while num <= space:
+            combos[num].expr = combos[num].expr_simple = expr
+            combos[num].cost = cost
+
+            num, expr, cost = 10 * num + seed, expr + str(seed), cost + 1
+
     return combos
 
 
