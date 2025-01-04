@@ -165,28 +165,3 @@ def state_prune(state: List[Combo]) -> List[Combo]:
     """Remove combinations without a solution."""
     return [s for s in state if s.exists()]
 
-
-def demo(digit: int, max_number: int = 20, *, steps: int=10):
-
-    # Prepare
-    state = setup_simulation(digit, space=max_number)
-
-    # Run a few steps
-    for step in range(1, steps + 1):
-        state, updates = simulate(state)
-        if updates == 0:
-            print(f"Step {step} produced no new updates.")
-            break
-
-        print(f"Step {step} produced {updates} updates.")
-
-    for c in state_prune(state):
-        print(f"{c.value:>4} = {c.expr:<25}   [{c.cost}]")
-
-
-if __name__ == "__main__":
-
-    # Defaults
-    digit, max_number, steps = 3, 20, 10
-
-    demo(digit, max_number, steps=steps)
