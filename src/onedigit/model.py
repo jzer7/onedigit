@@ -48,12 +48,19 @@ def _combo_unary_operation(combo1: Combo, op: str) -> Combo:
     """Apply an operation on a single number."""
     cost = combo1.cost
 
-    if op == "!":
-        val = math.factorial(combo1.value)
-        expr1 = f"({combo1.expr})!"
-        expr2 = f"{combo1.value}!"
-    else:
-        raise Exception("bad operator:", op)
+    match op:
+        case "!":
+            val = math.factorial(combo1.value)
+            expr1 = f"({combo1.expr})!"
+            expr2 = f"{combo1.value}!"
+        case "sqrt":
+            val = int(math.sqrt(combo1.value))
+            if (val * val) != combo1.value:
+                return Combo(value=0, expr="", expr_simple="", cost=_INF)
+            expr1 = f"√({combo1.expr})"
+            expr2 = f"√{combo1.value}"
+        case _:
+            raise Exception("bad operator:", op)
 
     return Combo(value=val, cost=cost, expr=expr1, expr_simple=expr2)
 
@@ -140,18 +147,20 @@ def simulate(state: List = []) -> tuple[List[Combo], int]:
     updates = 0
     for combo1 in known:
         # Unary operations
-        for op in ["!"]:
-            updates += state_update(new_combos, combo_unary_operation(combo1, op=op))
+        #   !:    factorial
+        #   sqrt: square root
+        for op in ["!", "sqrt"]:
+            updates += state_update(new_combos, _combo_unary_operation(combo1, op=op))
 
         for combo2 in known:
-            # Order is well defined:
+            # We only run cases where combo1 >= combo2
             #   + and * are commutative
             #   / and - do not make sense if combo1 < combo2
             for op in ["+", "-", "*", "/"]:
                 if combo1.value >= combo2.value:
                     updates += state_update(new_combos, _combo_binary_operation(combo1, combo2, op))
 
-            # Order is important:
+            # We need to run both cases (combo1 > combo2, and combo2 > combo1)
             #   ^
             for op in "^":
                 updates += state_update(new_combos, _combo_binary_operation(combo1, combo2, op))
