@@ -2,8 +2,12 @@
 
 This is a number puzzle.
 The object of the game is to find the best way to build a number based on a single digit.
-For example, to build the number $75$ using the digit $3$, we can use $(3^3 - 3!)$.
+For example, to build the number $75$ using the digit $3$, we can use $(3 \times 3^3 - 3!)$.
 It is more difficult to build $75$ using only the digit $6$, $(6 + 6) * 6 + \\frac{6 * 6}{6 + 6}$.
+
+## Background
+
+## Options
 
 ## Solver
 
@@ -12,10 +16,24 @@ That allows us to have a _directed acyclic graph_ (DAG).
 
 ## Usage
 
-There is no need for additional Python modules.
-So to get combinations using only the number $3$, just run:
+The script `calculate.py` is a CLI to the solver.
+The syntax is:
+
+```txt
+calculate.py [OPTIONS]
+
+Options:
+  --digit <number>          digit to use for expressions
+  --upper <number>          largest number to report
+  --steps <number>          number of iterations
+  --full                    show combinations in terms of the digit, otherwise use expanded values
+  --format <text | json>    format for the output
+  --help                    this information
+```
+
 
 ```sh
+python3 calculate.py --digit 3
 python3 combo_solver.py 3
 ```
 
