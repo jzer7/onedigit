@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """CLI to calculate number combinations with a single digit."""
 
-from fire import Fire
 import logging
-import src.onedigit as onedigit
 from json import JSONEncoder
-from dataclasses import asdict
+from typing import Any
+
+import fire
+
+import onedigit
 
 # Set loggers quickly, as they are used in multiple places
 logging.basicConfig(level=logging.DEBUG)
@@ -31,7 +33,7 @@ def calculate(
         output: format for the output (text, json).
     """
 
-    combos = onedigit.simple.calculate(digit, upper, steps=steps)
+    combos = onedigit.calculate(digit, upper, steps=steps)
     output = output.lower()
     if output == "text":
         for c in combos:
@@ -42,7 +44,7 @@ def calculate(
     elif output == "json":
         cc = []
         for c in combos:
-            cc.append(asdict(c))
+            cc.append(c.kv())
         jsenc = JSONEncoder()
         jstxt = jsenc.encode(cc)
         print(jstxt)
@@ -79,4 +81,4 @@ if __name__ == "__main__":
     ch.setFormatter(__consoleformatter)
     __logger.addHandler(ch)
 
-    f = Fire(calculate)
+    fire = fire.Fire(calculate)

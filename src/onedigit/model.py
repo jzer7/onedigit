@@ -1,27 +1,35 @@
 """Single digit combo."""
 
-from dataclasses import dataclass
-from typing import List
+import dataclasses
 import logging
+from typing import ClassVar, List
 import math
 
-_INF = 10**9
 
 __LOGGER = logging.getLogger("model")
 __LOGGER.setLevel(logging.INFO)
 
-@dataclass
+
+@dataclasses.dataclass
 class Combo:
     """A class that represents a combination that produces a value."""
 
     value: int
-    cost: int
+    cost: int = -1
     expr: str = ""
     expr_simple: str = ""
 
+    __INF: ClassVar[int] = 10**9
+
+    def __post_init__(self):
+        if self.cost == -1:
+            self.cost = self.__INF
+
     def exists(self) -> bool:
-        """Check if a solution exists to produce this value."""
-        return self.cost < _INF
+        """
+        Check if a solution exists to produce this value.
+        """
+        return self.cost < self.__INF
 
     def __repr__(self) -> str:
         return f"Combo: {self.value} = {self.expr_simple}    [{self.cost}]"
@@ -33,7 +41,7 @@ class Combo:
 def setup_simulation(seed: int, space: int = 100) -> List[Combo]:
     """Build space for a simulation"""
 
-    combos = [Combo(value=i, cost=_INF) for i in range(space + 1)]
+    combos = [Combo(value=i) for i in range(space + 1)]
 
     # Set up the seed digit
     combos[seed].expr = combos[seed].expr_simple = str(seed)
@@ -68,7 +76,7 @@ def _combo_unary_operation(combo1: Combo, op: str) -> Combo:
         case "sqrt":
             val = int(math.sqrt(combo1.value))
             if (val * val) != combo1.value:
-                return Combo(value=0, expr="", expr_simple="", cost=_INF)
+                return Combo(value=0, expr="", expr_simple="")
             expr1 = f"√({combo1.expr})"
             expr2 = f"√{combo1.value}"
         case _:
@@ -100,7 +108,7 @@ def _combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
 
         case "/":
             if combo1.value % combo2.value != 0:
-                return Combo(value=0, expr="", expr_simple="", cost=_INF)
+                return Combo(value=0, expr="", expr_simple="")
 
             val = combo1.value // combo2.value
             expr1 = f"({combo1.expr}) / ({combo2.expr})"
@@ -108,7 +116,7 @@ def _combo_binary_operation(combo1: Combo, combo2: Combo, op: str) -> Combo:
 
         case "^":
             if combo1.value <= 1 or combo2.value > 10:
-                return Combo(value=0, expr="", expr_simple="", cost=_INF)
+                return Combo(value=0, expr="", expr_simple="")
 
             val = combo1.value**combo2.value
             expr1 = f"({combo1.expr}) ^ ({combo2.expr})"
