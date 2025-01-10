@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""A CLI to calculate number combinations with a single digit."""
+"""CLI to calculate number combinations with a single digit."""
 
-import sys
+from fire import Fire
 import src.onedigit as onedigit
 from json import JSONEncoder
 from dataclasses import asdict
@@ -13,20 +13,28 @@ def calculate(
     *,
     full: bool = False,
     steps: int = 10,
-    format: str = "text",
+    output: str = "text",
 ):
     """
     Command line interface for the calculate function.
+
+    Args:
+        digit:  the digit to use to generate combinations
+        upper:  upper limit is the last number that is calculated
+        full:   display combinations using full expressions. Otherwise, it uses a simplified expression (default).
+        steps:  maximum number of generative rounds
+        output: format for the output (text, json).
     """
 
     combos = onedigit.simple.calculate(digit, upper, steps=steps)
-    if format == "text":
+    output = output.lower()
+    if output == "text":
         for c in combos:
             if full:
                 print(f"{c.value:>4} = {c.expr:<70}   [{c.cost:>3}]")
             else:
                 print(f"{c.value:>4} = {c.expr_simple:<15}   [{c.cost:>3}]")
-    elif format == "json":
+    elif output == "json":
         cc = []
         for c in combos:
             cc.append(asdict(c))
@@ -36,24 +44,8 @@ def calculate(
 
 
 
-def main():
-    digit, max_number, steps = 3, 50, 10
 
-    if len(sys.argv) >= 2:
-        try:
-            digit = int(sys.argv[1])
-        except ValueError:
-            print(f"Argument is the digit used. You used '{sys.argv[1]}'.")
-            exit(-1)
-        max_number = max(max_number, 10 * digit + 10)
 
-    if len(sys.argv) == 3:
-        try:
-            max_number = int(sys.argv[2])
-        except ValueError:
-            print(f"Argument is the digit used. You used '{sys.argv[2]}'.")
-            exit(-1)
 
-    calculate(digit, max_number, steps=steps)
 if __name__ == "__main__":
-    main()
+    f = Fire(calculate)

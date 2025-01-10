@@ -102,4 +102,18 @@ The simplest use is to get combinations using the digit `3`.
 python3 calculate.py --digit 3
 ```
 
+To see the default values:
+
+```sh
+python3 calculate.py --help
+```
+
+The JSON format is helpful as we can use [jq](https://jqlang.github.io/jq/) to run queries on the output.
+For example, to generate all combinations with the digit `7` up to `100`, with a cost less than '3'.
+
+```
+python3 calculate.py --digit 7 --upper 100 --format json \
+  | jq '.[] | select(.cost <= 3) | {"value":.value, "expression":.expr}'
+```
+
 木
