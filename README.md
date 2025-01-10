@@ -4,12 +4,10 @@ This is a number puzzle I saw in a newspaper when I was a kid.
 I do not know the official name of the game,
 but its objective is to find the _smallest expression_ that produces a value using a single digit.
 
-
 ## Background
 
 It is easier to understand this by looking at a problem.
 Say we are asked to find combinations to produce the number `75`.
-
 A simple case is using the digit `3`.
 
 1. The number `75` is divisible by `3`, so we would think `3 * 25`, except we cannot use `25`.
@@ -18,30 +16,30 @@ A simple case is using the digit `3`.
 1. Now we need an expression that produces `2` in terms of `3`. We could use `3 - 1`.
 1. And use `3 / 3` to produce that `1`.
 
-Or we can simply say $(3 \times (3^3 - (3 - \frac{3}{3}))$.
+So a valid combination would be $(3 \times (3^3 - (3 - \frac{3}{3})))$.
 
-We can then try other digits, `6` for example.
-Here we can start with `72 + 3`.
-The first term is simple, but getting that `3` is a bit tricky.
+Continuing with this example, we can try another digit, say `6`.
+Notice that `6 * 12` is `72`, which gets us closer to the target.
+So we can think of `75` as `72 + 3`.
+The first term (`72`) is easy (`6 * 12`), but getting the second term, `3`, requires some creative thinking.
 Eventually we end up with something like $(6 \times (6 + 6) + \frac{6 \times 6}{6 + 6})$.
-
 
 ### Scoring
 
 The cost of a solution is determined by the number of times the digit is used.
-So the solution $(3 \times (3^3 - (3 - \frac{3}{3}))$, has a cost of `6`.
-Likewise the solution using the digit `6` has a cost of `7`.
+So the solution $(3 \times (3^3 - (3 - \frac{3}{3})))$, has a cost of `6`.
+Likewise, the solution using the digit `6` has a cost of `7`.
 
 We can improve both solutions.
 One solution for the digit `3` would be $(3 \times 3^3 - 3!)$, which is `81 - 6`, and has a cost of `4`.
 And an improvement on the solution with the digit `6` could be $(\frac{666}{6} - 6 \times 6)$, with a cost of `6`.
 
-
 ### Operations
 
 The operations allowed also impact the difficulty of the game.
 Allowing only additions is the most limiting case.
-For example, if the digit `5` is available, we can only do:
+It makes for an easy game without much challenge.
+For example, using the digit `5`, we can only do:
 
 ```
 10 = 5 + 5
@@ -51,9 +49,11 @@ For example, if the digit `5` is available, we can only do:
 ...
 ```
 
-Expanding the operations to allow multiplication results in smaller solutions:
+Expanding the operations to allow multiplication results in less costly solutions:
 
 ```
+25 = 5 + 5 + 5 + 5 + 5
+
 25 = 5 * 5
 ```
 
@@ -64,15 +64,18 @@ And adding subtraction and division can both generate smaller solutions, and gen
 4 = 5 - 5/5
 ```
 
-The game gets more interesting as we increase the number of operations.
-For example adding exponentiation (`^`), factorial (`!`) and square root (`sqrt`) helps reduce the cost of some combinations.
-
-
+Many magazine versions of the game stop there.
+But online puzzles tend to include more operations.
+I have seen some with exponentiation (`^`), factorial (`!`) and square root (`sqrt`).
+And some even allow concatenation of the digit (example use `3` to produce `33`, with a cost of 2).
+Using those operations results in some expressions that look like mathematical versions of [Rube Goldberg machines](https://en.wikipedia.org/wiki/Rube_Goldberg_machine).
 
 ## Solver
 
 For the solver, I am using monotonic operations at first.
 That allows us to have a _directed acyclic graph_ (DAG).
+
+To get past the first limitation, I will also allow the use of the number `1` at cost of 2 (the result of `5/5`).
 
 ## Usage
 
@@ -91,6 +94,9 @@ Options:
   --help                    this information
 ```
 
+### Examples
+
+The simplest use is to get combinations using the digit `3`.
 
 ```sh
 python3 calculate.py --digit 3
