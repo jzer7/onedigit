@@ -4,8 +4,9 @@
 import json
 import logging
 import logging.handlers
+from typing import Any
 
-import fire
+import click
 
 import onedigit
 
@@ -14,6 +15,35 @@ logging.basicConfig(level=logging.DEBUG)
 __logger = logging.getLogger("cli")
 
 
+def __click_validate(ctx: click.Context, param: click.Parameter, value: Any):
+
+    if isinstance(value, str):
+        value = value.lower()
+
+    match param.human_readable_name:
+        case "digit":
+            if not (isinstance(value, int) and (1 <= value <= 9)):
+                raise click.BadParameter("Should be an integer between 1 and 9.")
+        case "output":
+            if value not in ["text", "json"]:
+                raise click.BadParameter("Valid options are 'text' or 'json'.")
+        case "steps":
+            if not (isinstance(value, int) and (value >= 1)):
+                raise click.BadParameter("Should be 1 or larger.")
+        case "upper":
+            if not (isinstance(value, int) and (value >= 10)):
+                raise click.BadParameter("Should be 10 or larger.")
+
+    return value
+
+
+@click.command(help="Generate arithmetic combinations using a single digit.")
+@click.option("--digit", default=9, callback=__click_validate, help="digit to use for combinations")
+@click.option("--upper", default=90, callback=__click_validate, help="highest value to compute")
+@click.option("--full", is_flag=True, help="to display full expressions")
+@click.option("--steps", default=10, callback=__click_validate, help="iterations to use during evaluation (advanced)")
+@click.option("--output", default="text", callback=__click_validate, help="format for the output <text|json>")
+@click.version_option(onedigit.__version__)
 def calculate(
     digit: int = 9,
     upper: int = 90,
@@ -117,5 +147,4 @@ if __name__ == "__main__":
     ch.setFormatter(__consoleformatter)
     __logger.addHandler(ch)
 
-    fire = fire.Fire(calculate)
-    exit(0 if fire else 1)
+    calculate()
