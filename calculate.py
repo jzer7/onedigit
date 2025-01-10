@@ -2,9 +2,14 @@
 """CLI to calculate number combinations with a single digit."""
 
 from fire import Fire
+import logging
 import src.onedigit as onedigit
 from json import JSONEncoder
 from dataclasses import asdict
+
+# Set loggers quickly, as they are used in multiple places
+logging.basicConfig(level=logging.DEBUG)
+__logger = logging.getLogger("cli")
 
 
 def calculate(
@@ -43,9 +48,35 @@ def calculate(
         print(jstxt)
 
 
-
-
-
-
 if __name__ == "__main__":
+    # -----------------------------------------------------------
+    # Configure logging
+    # * The console will get messages INFO and higher, things
+    #   we want the user to see right away.
+    # * The log file will get messages DEBUG and higher,
+    #   information for post execution analysis
+    # -----------------------------------------------------------
+
+    # Main logger : used only by other libraries
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")
+
+    # Logger for the CLI
+    __logger.setLevel(logging.DEBUG)
+
+    # create formatters
+    __fileformatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    __consoleformatter = logging.Formatter("%(levelname)s - %(message)s")
+
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler("calculate.log")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(__fileformatter)
+    __logger.addHandler(fh)
+
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    ch.setFormatter(__consoleformatter)
+    __logger.addHandler(ch)
+
     f = Fire(calculate)

@@ -1,7 +1,11 @@
 """Functionality for easy access. It schedules the operations that calculate the combinations."""
 
+import logging
 from typing import List
 from . import model
+
+__LOGGER = logging.getLogger("simple")
+__LOGGER.setLevel(logging.INFO)
 
 
 def calculate(digit: int, max_number: int = 20, *, steps: int = 10) -> List[model.Combo]:

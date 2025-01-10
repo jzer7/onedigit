@@ -2,10 +2,13 @@
 
 from dataclasses import dataclass
 from typing import List
+import logging
 import math
 
 _INF = 10**9
 
+__LOGGER = logging.getLogger("model")
+__LOGGER.setLevel(logging.INFO)
 
 @dataclass
 class Combo:
