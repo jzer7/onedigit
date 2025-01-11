@@ -1,9 +1,12 @@
 [project]
 name = "onedigit"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Onedigit arithmetic puzzle"
 authors = [
     {name = "Juan Rubio", email = "jcrubio@gmail.com"},
+]
+keywords = [
+    "puzzle",
 ]
 dependencies = [
     "fire>=0.7.0",
@@ -12,8 +15,18 @@ requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "MIT"}
 
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+
+[tool.pdm.version]
+source = "file"
+path = "src/onedigit/info.py"
+
 [tool.ruff]
-line-length = 125
+line-length = 120
 
 [dependency-groups]
 lint = [

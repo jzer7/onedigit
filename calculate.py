@@ -22,7 +22,7 @@ def calculate(
     output: str = "text",
 ):
     """
-    Command line interface for the calculate function.
+    Command line interface to calculate combinations using a given digit.
 
     Args:
         digit:  the digit to use to generate combinations
