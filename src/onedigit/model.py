@@ -2,8 +2,8 @@
 
 import dataclasses
 import logging
-from typing import ClassVar, List
 import math
+from typing import Any, ClassVar, List
 
 
 __LOGGER = logging.getLogger("model")
@@ -37,6 +37,8 @@ class Combo:
     def __lt__(self, other) -> int:
         return self.value < other.value
 
+    def todict(self) -> dict[str, Any]:
+        return dataclasses.asdict(self)
 
 def setup_simulation(seed: int, space: int = 100) -> List[Combo]:
     """Build space for a simulation"""

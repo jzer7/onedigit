@@ -44,7 +44,7 @@ def calculate(
     elif output == "json":
         cc = []
         for c in combos:
-            cc.append(c.kv())
+            cc.append(c.todict())
         jsenc = JSONEncoder()
         jstxt = jsenc.encode(cc)
         print(jstxt)
