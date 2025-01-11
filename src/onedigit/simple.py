@@ -2,7 +2,8 @@
 
 import logging
 from typing import List
-from . import model
+
+from onedigit import model
 
 __LOGGER = logging.getLogger("simple")
 __LOGGER.setLevel(logging.INFO)
@@ -14,12 +15,12 @@ def calculate(digit: int, max_number: int = 20, *, steps: int = 10) -> List[mode
     """
 
     # Prepare
-    state = model.setup_simulation(digit, space=max_number)
+    current = model.Model(digit, space=max_number)
 
     # Run a few steps
     for step in range(1, steps + 1):
-        state, updates = model.simulate(state)
+        updates = current.simulate()
         if updates == 0:
             break
 
-    return model.state_prune(state)
+    return current.state_prune()

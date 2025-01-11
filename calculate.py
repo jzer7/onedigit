@@ -3,7 +3,6 @@
 
 import logging
 from json import JSONEncoder
-from typing import Any
 
 import fire
 
