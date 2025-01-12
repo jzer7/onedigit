@@ -23,4 +23,4 @@ def calculate(digit: int, max_number: int = 20, *, steps: int = 10) -> List[mode
         if updates == 0:
             break
 
-    return current.state_prune()
+    return current.get_combos()
