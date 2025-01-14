@@ -30,20 +30,38 @@ class Combo:
     def exists(self) -> bool:
         """
         Check if a solution exists to produce this value.
+
+        Returns:
+            bool: True if this is a valid combination
         """
         return self.cost < self.__INF
 
     def __repr__(self) -> str:
+        """
+        Provide a string representatoin of the Combo object.
+
+        Returns:
+            str: string representation of the Combo object
+        """
         return f"Combo: {self.value} = {self.expr_simple}    [{self.cost}]"
 
-    def __lt__(self, other) -> int:
+    def __lt__(self, other: Combo) -> bool:
         """
-        Compares 2 combos according to their value.
-        This function is used by Python's sorting functions.
+        Compares this combination against another.
+
+        This function is used by Python to sort containers
+        with this type of objects.
+
+        Args:
+            other (Combo): combination object we are comparing with
+
+        Returns:
+            bool: True if this combination has a lower value compared to the 'other' combination.
         """
+        assert isinstance(other, Combo)
         return self.value < other.value
 
-    def todict(self) -> dict[str, Any]:
+    def asdict(self) -> dict[str, Any]:
         """
         Creates a dictionary out of this dataclass object.
         This is needed to serialize the object to JSON.
@@ -85,15 +103,22 @@ class Combo:
 
     def binary_operation(self, combo2: Combo, op: str) -> Combo:
         """
-        Apply an operation with this combo, and another one.
+        Apply an operation with this combo and another one.
+
+        This function can result in an invalid value, in which case the
+        result is a Combo object that evaluates to zero.
 
         Args:
+            combo2 (Combo): second combination to use
+            op (str): operation to perform between both combinations.
+                Operations supported: addition(+), subtraction(-),
+                multiplication(*), integer division(/), exponentiation(^)
 
         Raises:
             ValueError: when receiving an invalid operation
 
         Returns:
-            Combo: a new Combo object.
+            Combo: the result of the operation, as a new Combo object.
         """
 
         cost = self.cost + combo2.cost
@@ -141,57 +166,64 @@ class Model:
     A onedigit simulation.
     """
 
-    seed: int
-    space: int
+    digit: int
+    upper_value: int
     state: List[Combo]
     logger: logging.Logger
 
-    def __init__(self, seed: int, space: int = 100, empty: bool = False):
+    def __init__(self, digit: int, upper_value: int = 100, empty: bool = False):
         """
-        Build space for a simulation.
+        Build a model for the game simulation.
 
         Args:
-            seed (int): digit to use when creating expresions
-            space (int, optional): upper limit of values the simulation
+            digit (int): digit to use when creating expresions
+            upper_value (int, optional): upper limit of values the model
                 retains. Defaults to 100.
             empty (bool, optional): leave object uninitialized. Useful
                 when the plan is to copy values from a different object
-                inside. Defaults to False.
+                inside. (Look at Model.copy()). Defaults to False.
+        Raises:
+            ValueError: if digit value is out of range [1,9]
+            ValueError: if upper value is too large (more than 10,000).
         """
-        if not empty:
-            self.prepare(seed=seed, space=space)
 
-    def prepare(self, seed: int, space: int):
         self.logger = logging.getLogger("model")
         self.logger.setLevel(logging.INFO)
+        self.logger.debug("Model.__init__()")
 
-        self.logger.debug("Model.prepare()")
-        if not (1 <= seed <= 9):
-            raise ValueError("seed must be an integer between 1 and 9, inclusive.")
-        self.seed = seed
-        if not (0 <= space <= 10_000):
-            raise ValueError("space must be a positive number below 10k.")
-        self.space = space
+        # In some cases, we need to skip the rest of the initialization.
+        # For example if this is a shallow object that will be used to
+        # receive a full copy of another object.
+        if empty:
+            return
 
-        combos = [Combo(value=i) for i in range(space + 1)]
+        if not isinstance(digit, int) or not (1 <= digit <= 9):
+            raise ValueError("digit must be an integer between 1 and 9, inclusive.")
+        self.digit = digit
 
-        # Set up the seed digit
-        combos[seed].expr_full = combos[seed].expr_simple = str(seed)
-        combos[seed].cost = 1
+        if not isinstance(upper_value, int) or not (0 <= upper_value <= 10_000):
+            raise ValueError("upper value must be a positive number below 10k.")
+        self.upper_value = upper_value
+
+        combos = [Combo(value=i) for i in range(upper_value + 1)]
+
+        # Set up the digit for the simulation
+        combos[digit].expr_full = combos[digit].expr_simple = str(digit)
+        combos[digit].cost = 1
 
         # Allow an expression for `1`
-        combos[1].expr_full = f"{seed}/{seed}"
+        combos[1].expr_full = f"{digit}/{digit}"
         combos[1].expr_simple = str(1)
         combos[1].cost = 2
 
         # Allow expressions for joint digits (say, 22, two 2s)
-        if 1 <= seed <= 9:
-            num, expr, cost = seed, str(seed), 1
-            while num <= space:
+        if 1 <= digit <= 9:
+            num, expr, cost = digit, str(digit), 1
+            while num <= upper_value:
                 combos[num].expr_full = combos[num].expr_simple = expr
                 combos[num].cost = cost
 
-                num, expr, cost = 10 * num + seed, expr + str(seed), cost + 1
+                num, expr, cost = 10 * num + digit, expr + str(digit), cost + 1
 
         self.state = combos
 
@@ -207,23 +239,38 @@ class Model:
             Model: a new Model object
         """
         new_model = Model(0, 0, empty=True)
-        new_model.seed = self.seed
-        new_model.space = self.space
+        new_model.digit = self.digit
+        new_model.upper_value = self.upper_value
         new_model.state = self.state.copy()
         new_model.logger = self.logger
         return new_model
+
+    def __repr__(self) -> str:
+        """
+        Provide a string representatoin of the Model object.
+
+        Returns:
+            str: string representation of the Model object
+        """
+        return f"Model(digit={self.digit}, upper_value={self.upper_value})"
 
     def state_update(self, candidate: Combo, *, max_cost: int = 20) -> bool:
         """
         Attempt addition of a single combination to the existing state.
 
+        The combination will be checked against existing solutions, and
+        it will be added if it is consider beneficial to the calculation.
+
+        Args:
+            candidate (Combo): combination to add
+            max_cost (int, optional): highest cost for combination
+                the model will accept. Defaults to 20.
 
         Returns:
             bool: True if the update was valid.
         """
 
-        self.logger.debug("state_update")
-
+        self.logger.debug("Model.state_update()")
 
         if candidate.cost > max_cost:
             return False
@@ -248,9 +295,15 @@ class Model:
         It picks the best combination for a given value based on cost of
         the full expression.
 
+        Args:
+            extra (Model): model with combinations to be added to this model
+            max_cost (int, optional): highest cost for combination
+                the model will accept. Defaults to 20.
         """
 
-        for combo2 in extra.get_combos():
+        self.logger.debug("Model.state_merge()")
+
+        for combo2 in extra.get_valid_combos():
             val2, cost2 = combo2.value, combo2.cost
 
             if (
@@ -309,7 +362,7 @@ class Model:
 
         return updates
 
-    def get_combos(self) -> List[Combo]:
+    def get_valid_combos(self) -> List[Combo]:
         """
         Get valid combinations.
 

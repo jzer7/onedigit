@@ -18,23 +18,53 @@ def calculate(
     digit: int = 9,
     upper: int = 90,
     *,
-    full: bool = False,
     steps: int = 10,
+    full: bool = False,
     output: str = "text",
-):
+) -> bool:
     """
     Command line interface to calculate combinations using a given digit.
 
     Args:
         digit (int): the digit to use to generate combinations
         upper (int): upper limit is the last number that is calculated
-        full (bool, optional): display combinations using full expressios. Defaults to False.
         steps (int, optional): maximum number of generative rounds. Defaults to 10.
+        full (bool, optional): display combinations using full expressios. Defaults to False.
         output (str, optional): format for the output (text/json). Defaults to "text".
+
+    Returns:
+        bool: True if calculation runs without issues.
     """
 
-    combos = onedigit.calculate(digit, upper, steps=steps)
-    output = output.lower()
+    __logger.debug(
+        f"calculate(digit={type(digit).__name__}({digit}), upper={type(upper).__name__}({upper}), steps={type(steps).__name__}({steps}), output={type(output).__name__}({output}))"
+    )
+
+    # ------------------------------------------------------------
+    # This is an entry level function. So handle for input
+    # sanitation.
+    try:
+        digit = int(digit)
+        upper = int(upper)
+        steps = int(steps)
+    except ValueError:
+        __logger.error("digit, upper and steps must be positive integer numbers")
+        return False
+
+    if not (1 <= digit <= 9):
+        __logger.error("digit must be an integer number between 1 and 9")
+        return False
+
+    if isinstance(output, str):
+        output = output.lower()
+    else:
+        output = ""
+    if output not in ["text", "json"]:
+        __logger.error("output must be 'text' or 'json'")
+        return False
+
+    # ------------------------------------------------------------
+    combos = onedigit.calculate(digit=digit, upper_value=upper, steps=steps)
     if output == "text":
         for c in combos:
             if full:
@@ -44,10 +74,12 @@ def calculate(
     elif output == "json":
         cc = []
         for c in combos:
-            cc.append(c.todict())
+            cc.append(c.asdict())
         jsenc = json.JSONEncoder()
         jstxt = jsenc.encode(cc)
         print(jstxt)
+
+    return True
 
 
 if __name__ == "__main__":
@@ -66,7 +98,9 @@ if __name__ == "__main__":
     __logger.setLevel(logging.DEBUG)
 
     # create formatters
-    __fileformatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    __fileformatter = logging.Formatter(
+        "%(asctime)s, %(name)s, %(levelname)s, %(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z"
+    )
     __consoleformatter = logging.Formatter("%(levelname)s - %(message)s")
 
     # create file handler which logs even debug messages
@@ -84,3 +118,4 @@ if __name__ == "__main__":
     __logger.addHandler(ch)
 
     fire = fire.Fire(calculate)
+    exit(0 if fire else 1)
