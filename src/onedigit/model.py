@@ -75,6 +75,12 @@ class Combo:
         """
         Apply an operation on a single number.
 
+        This function can result in an invalid value, in which case the
+        result is a Combo object that evaluates to zero.
+
+        Operations produce a new Combo object.
+        Operations do not modify the current object.
+
         Args:
             op (str): operation to run (!, sqrt).
 
@@ -85,28 +91,33 @@ class Combo:
             Combo: a new Combo object.
         """
 
+        # Only use parenthesis for cases it helps (if expression has spaces)
+        value1_expr_full = self.expr_full
+        if " " in value1_expr_full:
+            value1_expr_full = "(" + value1_expr_full + ")"
+
         match op:
             case "!":
                 if (self.value < 0) or (self.value > 11):
                     # Prevent illogical or gigantic values in calculations
-                    return Combo(value=0, expr_full="", expr_simple="")
-                val = math.factorial(self.value)
-                expr1 = f"({self.expr_full})!"
-                expr2 = f"{self.value}!"
+                    return Combo(value=0, expr_full="0", expr_simple="0")
+                rc_val = math.factorial(self.value)
+                rc_expr_full = value1_expr_full + "!"
+                rc_expr_simple = str(rc_val) + "!"
             case "sqrt":
                 if self.value < 0:
                     # Prevent irrational values
-                    return Combo(value=0, expr_full="", expr_simple="")
-                val = int(math.sqrt(self.value))
-                if (val * val) != self.value:
+                    return Combo(value=0, expr_full="0", expr_simple="0")
+                rc_val = int(math.sqrt(self.value))
+                if (rc_val * rc_val) != self.value:
                     # Only allow expressions that result in integer values
-                    return Combo(value=0, expr_full="", expr_simple="")
-                expr1 = f"√({self.expr_full})"
-                expr2 = f"√{self.value}"
+                    return Combo(value=0, expr_full="0", expr_simple="0")
+                rc_expr_full = "√" + value1_expr_full
+                rc_expr_simple = "√" + str(rc_val)
             case _:
                 raise ValueError("bad operator:", op)
 
-        return Combo(value=val, cost=self.cost, expr_full=expr1, expr_simple=expr2)
+        return Combo(value=rc_val, cost=self.cost, expr_full=rc_expr_full, expr_simple=rc_expr_simple)
 
     def binary_operation(self, combo2: Combo, op: str) -> Combo:
         """
@@ -114,6 +125,9 @@ class Combo:
 
         This function can result in an invalid value, in which case the
         result is a Combo object that evaluates to zero.
+
+        Operations produce a new Combo object.
+        Operations do not modify the current object.
 
         Args:
             combo2 (Combo): second combination to use
@@ -130,42 +144,49 @@ class Combo:
 
         cost = self.cost + combo2.cost
 
+        # Only use parenthesis for cases it helps (if expression has spaces)
+        value1_expr_full, value2_expr_full = self.expr_full, combo2.expr_full
+        if " " in value1_expr_full:
+            value1_expr_full = "(" + value1_expr_full + ")"
+        if " " in value2_expr_full:
+            value2_expr_full = "(" + value2_expr_full + ")"
+
         match op:
             case "+":
-                val = self.value + combo2.value
-                expr1 = f"({self.expr_full}) + ({combo2.expr_full})"
-                expr2 = f"{self.value} + {combo2.value}"
+                rc_val = self.value + combo2.value
+                rc_expr_full = f"{value1_expr_full} + {value2_expr_full}"
+                rc_expr_simple = f"{self.value} + {combo2.value}"
 
             case "-":
-                val = self.value - combo2.value
-                expr1 = f"({self.expr_full}) - ({combo2.expr_full})"
-                expr2 = f"{self.value} - {combo2.value}"
+                rc_val = self.value - combo2.value
+                rc_expr_full = f"{value1_expr_full} - {value2_expr_full}"
+                rc_expr_simple = f"{self.value} - {combo2.value}"
 
             case "*":
-                val = self.value * combo2.value
-                expr1 = f"({self.expr_full}) * ({combo2.expr_full})"
-                expr2 = f"{self.value} * {combo2.value}"
+                rc_val = self.value * combo2.value
+                rc_expr_full = f"{value1_expr_full} * {value2_expr_full}"
+                rc_expr_simple = f"{self.value} * {combo2.value}"
 
             case "/":
                 if self.value % combo2.value != 0:
-                    return Combo(value=0, expr_full="", expr_simple="")
+                    return Combo(value=0, expr_full="0", expr_simple="0")
 
-                val = self.value // combo2.value
-                expr1 = f"({self.expr_full}) / ({combo2.expr_full})"
-                expr2 = f"{self.value} / {combo2.value}"
+                rc_val = self.value // combo2.value
+                rc_expr_full = f"{value1_expr_full} / {value2_expr_full}"
+                rc_expr_simple = f"{self.value} / {combo2.value}"
 
             case "^":
                 if self.value <= 1 or combo2.value > 10:
-                    return Combo(value=0, expr_full="", expr_simple="")
+                    return Combo(value=0, expr_full="0", expr_simple="0")
 
-                val = self.value**combo2.value
-                expr1 = f"({self.expr_full}) ^ ({combo2.expr_full})"
-                expr2 = f"{self.value} ^ {combo2.value}"
+                rc_val = self.value**combo2.value
+                rc_expr_full = f"{value1_expr_full} ^ {value2_expr_full}"
+                rc_expr_simple = f"{self.value} ^ {combo2.value}"
 
             case _:
                 raise ValueError("bad operator:", op)
 
-        return Combo(value=val, cost=cost, expr_full=expr1, expr_simple=expr2)
+        return Combo(value=rc_val, cost=cost, expr_full=rc_expr_full, expr_simple=rc_expr_simple)
 
 
 class Model:
