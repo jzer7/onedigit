@@ -32,3 +32,7 @@ line-length = 120
 lint = [
     "ruff>=0.8.4",
 ]
+test = [
+    "hypothesis[cli]>=6.123.15",
+    "pytest>=8.3.4",
+]
