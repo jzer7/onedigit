@@ -1,8 +1,10 @@
 {
     "files.exclude": {
         "**/__pycache__": true,
+        "**/.pytest_cache": true,
         "**/pdm.lock": true,
-       "**/.pdm-build": true,
+        "**/.hypothesis": true,
+        "**/.pdm-build": true,
         "**/.pdm-python": true,
         "**/.ruff_cache": true,
         "**/.venv": true,

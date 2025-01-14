@@ -87,12 +87,19 @@ class Combo:
 
         match op:
             case "!":
+                if (self.value < 0) or (self.value > 11):
+                    # Prevent illogical or gigantic values in calculations
+                    return Combo(value=0, expr_full="", expr_simple="")
                 val = math.factorial(self.value)
                 expr1 = f"({self.expr_full})!"
                 expr2 = f"{self.value}!"
             case "sqrt":
+                if self.value < 0:
+                    # Prevent irrational values
+                    return Combo(value=0, expr_full="", expr_simple="")
                 val = int(math.sqrt(self.value))
                 if (val * val) != self.value:
+                    # Only allow expressions that result in integer values
                     return Combo(value=0, expr_full="", expr_simple="")
                 expr1 = f"√({self.expr_full})"
                 expr2 = f"√{self.value}"

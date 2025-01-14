@@ -47,7 +47,15 @@ def test_combo_sqrt(value1):
 
     combo2 = combo1.unary_operation("sqrt")
 
-    assert (combo2.value * combo2.value) == value1
+    if value1 < 0:
+        assert combo2.value == 0
+        return
+
+    expected1 = int(math.sqrt(value1))
+    if expected1 * expected1 != value1:
+        expected1 = 0
+
+    assert combo2.value == expected1
 
 
 # Protect against gigantic values crashing the
