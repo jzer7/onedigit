@@ -3,7 +3,9 @@
 
 import json
 import logging
+import logging.config
 import logging.handlers
+import time
 
 import fire
 
@@ -90,6 +92,61 @@ if __name__ == "__main__":
     # * The log file will get messages DEBUG and higher,
     #   information for post execution analysis
     # -----------------------------------------------------------
+    __log_config = """
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "simple": {
+            "format": "%(levelname)-8s - %(message)s"
+        },
+        "full": {
+            "format": "%(asctime)s, %(name)s, %(levelname)s, %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        }
+    },
+    "filters": {
+        "warnings_and_below": {
+            "()" : "__main__.filter_maker",
+            "level": "WARNING"
+        }
+    },
+    "handlers": {
+        "stdout": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",
+            "filters": ["warnings_and_below"]
+        },
+        "stderr": {
+            "class": "logging.StreamHandler",
+            "level": "ERROR",
+            "formatter": "simple",
+            "stream": "ext://sys.stderr"
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "formatter": "full",
+            "filename": "calculate.log",
+            "mode": "w"
+        }
+    },
+    "root": {
+        "level": "DEBUG",
+        "handlers": [
+            "stderr",
+            "stdout",
+            "file"
+        ]
+    }
+}
+"""
+
+    # https://docs.python.org/3/howto/logging-cookbook.html#formatting-times-using-utc-gmt-via-configuration
+    # BUG: Using '%z' with UTC does not put the right timezone (it uses the local timezone, with the UTC time). So holding up on this one.
+    class UTCFormatter(logging.Formatter):
+        converter = time.gmtime
 
     # Main logger : used only by other libraries
     logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")
@@ -98,9 +155,7 @@ if __name__ == "__main__":
     __logger.setLevel(logging.DEBUG)
 
     # create formatters
-    __fileformatter = logging.Formatter(
-        "%(asctime)s, %(name)s, %(levelname)s, %(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z"
-    )
+    __fileformatter = UTCFormatter("%(asctime)s, %(name)s, %(levelname)s, %(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z")
     __consoleformatter = logging.Formatter("%(levelname)s - %(message)s")
 
     # create file handler which logs even debug messages
