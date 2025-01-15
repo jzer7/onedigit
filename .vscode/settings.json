@@ -4,6 +4,7 @@
         "**/.pytest_cache": true,
         "**/pdm.lock": true,
         "**/.hypothesis": true,
+        "**/.mypy_cache": true,
         "**/.pdm-build": true,
         "**/.pdm-python": true,
         "**/.ruff_cache": true,

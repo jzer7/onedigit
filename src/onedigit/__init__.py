@@ -10,6 +10,6 @@ from onedigit.info import (  # noqa: F401
     __bugtrack_url__,
 )
 from onedigit.model import Combo, Model
-from onedigit.simple import calculate
+from onedigit.simple import advance, calculate
 
-__all__ = ["Combo", "Model", "calculate"]
+__all__ = ["Combo", "Model", "calculate", "advance"]

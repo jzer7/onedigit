@@ -12,11 +12,30 @@ import onedigit
 
 
 class Test_Model(unittest.TestCase):
+    def check_model(self, model: onedigit.Model, digit: int):
+        # Verify integrity of the object
+        assert model is not None
+        assert isinstance(model, onedigit.Model)
+
+        # Verify integrity of the Model object
+        assert isinstance(model.digit, int)
+        assert model.digit == digit
+
+        assert isinstance(model.state, list)
+        assert len(model.state) > 0
+        assert isinstance(model.state[0], onedigit.Combo)
+
+        # At least we should have a combination for the digit itself
+        assert model.state[digit] is not None
+        assert isinstance(model.state[digit], onedigit.Combo)
+        assert model.state[digit].exists()
+
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_creation_good(self, digit):
+
         # Good digit
         model = onedigit.Model(digit=digit)
-        assert model.digit == digit
+        self.check_model(model, digit)
 
     @given(digit=hst.integers(min_value=10))
     def test_model_creation_bad(self, digit):
@@ -24,6 +43,12 @@ class Test_Model(unittest.TestCase):
         with self.assertRaises(expected_exception=ValueError):
             model = onedigit.Model(digit=digit)
 
-    @given(source=hst.integers())
-    def test_model_copy(self, source):
-        pass
+    @given(digit=hst.integers(min_value=1, max_value=9))
+    def test_model_copy(self, digit):
+        # Create a copy and delete the original
+        model1 = onedigit.Model(digit=digit)
+        model2 = model1.copy()
+        del model1
+
+        # Verify integrity of the copy
+        self.check_model(model2, digit)
