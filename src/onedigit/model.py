@@ -54,8 +54,11 @@ class Combo:
 
     def asdict(self) -> dict[str, Any]:
         """
-        Creates a dictionary out of this dataclass object.
+        Creates a dictionary representation of the Combo object.
+
         This is needed to serialize the object to JSON.
+        It is also used during serialization of the Model object
+        (see Model.asdict()).
 
         Returns:
             dict[str, Any]: dictionary with the dataclass fields.
@@ -255,6 +258,27 @@ class Model:
         new_model.logger = self.logger
         return new_model
 
+    def fromdict(self, input: dict):
+        """Create a Model object from a dictionary
+
+        Functions to export an Model to a dictionary, and to create an
+        object from a dictionary are used during object serialization. That
+        functionality is used when taking snapshots of a Model simulation.
+
+        Args:
+            input (dict): dictionary representation of the object
+
+        Raises:
+            ValueError: _description_
+        """
+        if ("digit" not in input) or ("upper_value" not in input) or ("state" not in input):
+            raise ValueError("input dictionary is missing keys.")
+
+        new_model = Model(0, 0, empty=True)
+        new_model.digit = input["digit"]
+        new_model.upper_value = input["upper_value"]
+        new_model.state = input["state"]
+
     def __repr__(self) -> str:
         """
         Provide a string representatoin of the Model object.
@@ -379,3 +403,16 @@ class Model:
             List[Combo]: list of valid Combo objects
         """
         return list(self.state.values())
+
+    def asdict(self) -> dict[str, Any]:
+        """
+        Creates a dictionary representation of the Model object.
+
+        Functions to export an Model to a dictionary, and to create an
+        object from a dictionary are used during object serialization. That
+        functionality is used when taking snapshots of a Model simulation.
+
+        Returns:
+            dict[str, Any]: dictionary with the dataclass fields.
+        """
+        return {"digit": self.digit, "upper_value": self.upper_value, "state": self.state.copy()}
