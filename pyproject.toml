@@ -6,6 +6,8 @@ authors = [
     {name = "Juan Rubio", email = "jcrubio@gmail.com"},
 ]
 keywords = [
+    "arithmetic-game",
+    "math",
     "puzzle",
 ]
 dependencies = [
@@ -15,9 +17,11 @@ requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "MIT"}
 
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
 
 [tool.pdm]
 
@@ -25,8 +29,10 @@ build-backend = "pdm.backend"
 source = "file"
 path = "src/onedigit/info.py"
 
+
 [tool.ruff]
 line-length = 120
+
 
 [dependency-groups]
 lint = [
