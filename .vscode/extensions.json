@@ -1,6 +1,8 @@
 {
     "recommendations": [
-        "charliermarsh.ruf",
+        "charliermarsh.ruff",
+        "KevinRose.vsc-python-indent",
+        "ms-python.mypy-type-checker",
         "ms-python.python"
     ]
 }
