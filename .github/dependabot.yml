@@ -6,8 +6,14 @@
 
 version: 2
 updates:
+  # Version updates for Python modules
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      # Check for updates to Python packages every week
+      interval: "weekly"
+
+  # Version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
       interval: "weekly"
