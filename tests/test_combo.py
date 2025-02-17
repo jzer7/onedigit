@@ -1,74 +1,73 @@
 import math
+import unittest
 
 from hypothesis import given, strategies as hst
 
 import onedigit
 
-# value: int
-# cost: int = -1
-# expr: str = ""
-# expr_simple: str = ""
+# class Combo:
+#     value: int
+#     cost: int = 0  # (set to 10**9 if empty)
+#     expr_full: str = ""  # (set to str(value) if empty)
+#     expr_simple: str = ""  # (set to str(value) if empty)
 
 
-@given(value1=hst.integers())
-def test_combo_positional(value1):
-    combo1 = onedigit.Combo(value1)
+class Test_Combo(unittest.TestCase):
+    @given(value1=hst.integers())
+    def test_combo_positional(self, value1: int):
+        combo1 = onedigit.Combo(value1)
 
-    assert combo1.value == value1
+        assert combo1.value == value1
 
+    @given(value1=hst.integers(), value2=hst.integers())
+    def test_combo_addition(self, value1: int, value2: int):
+        combo1 = onedigit.Combo(value1)
+        combo2 = onedigit.Combo(value2)
 
-@given(value1=hst.integers(), value2=hst.integers())
-def test_combo_addition(value1, value2):
-    combo1 = onedigit.Combo(value1)
-    combo2 = onedigit.Combo(value2)
+        combo3 = combo1.binary_operation(combo2, "+")
+        combo4 = combo2.binary_operation(combo1, "+")
 
-    combo3 = combo1.binary_operation(combo2, "+")
-    combo4 = combo2.binary_operation(combo1, "+")
+        assert combo3.value == combo4.value
+        assert combo3.value == (value1 + value2)
 
-    assert combo3.value == combo4.value
-    assert combo3.value == (value1 + value2)
+    @given(value1=hst.integers(), value2=hst.integers())
+    def test_combo_multiplication(self, value1: int, value2: int):
+        combo1 = onedigit.Combo(value1)
+        combo2 = onedigit.Combo(value2)
 
+        combo3 = combo1.binary_operation(combo2, "*")
+        combo4 = combo2.binary_operation(combo1, "*")
 
-@given(value1=hst.integers(), value2=hst.integers())
-def test_combo_multiplication(value1, value2):
-    combo1 = onedigit.Combo(value1)
-    combo2 = onedigit.Combo(value2)
+        assert combo3.value == combo4.value
+        assert combo3.value == (value1 * value2)
 
-    combo3 = combo1.binary_operation(combo2, "*")
-    combo4 = combo2.binary_operation(combo1, "*")
+    @given(value1=hst.integers())
+    def test_combo_sqrt(self, value1: int):
+        combo1 = onedigit.Combo(value1)
 
-    assert combo3.value == combo4.value
-    assert combo3.value == (value1 * value2)
+        combo2 = combo1.unary_operation("sqrt")
 
+        if value1 < 0:
+            assert combo2.value == 0
+            return
 
-@given(value1=hst.integers())
-def test_combo_sqrt(value1):
-    combo1 = onedigit.Combo(value1)
+        expected1 = int(math.sqrt(value1))
+        if expected1 * expected1 != value1:
+            expected1 = 0
 
-    combo2 = combo1.unary_operation("sqrt")
+        assert combo2.value == expected1
 
-    if value1 < 0:
-        assert combo2.value == 0
-        return
+    # Protect against gigantic values crashing the
+    # tester. 50! is over 3x10^64
+    @given(value1=hst.integers(max_value=50))
+    def test_combo_factorial(self, value1: int):
+        combo1 = onedigit.Combo(value1)
 
-    expected1 = int(math.sqrt(value1))
-    if expected1 * expected1 != value1:
-        expected1 = 0
+        combo2 = combo1.unary_operation("!")
 
-    assert combo2.value == expected1
+        # The class needs to guard against bad input
+        if (value1 < 0) or (value1 > 11):
+            assert combo2.value == 0
+            return
 
-
-# Protect against gigantic values crashing the
-# tester. 50! is over 3x10^64
-@given(value1=hst.integers(max_value=50))
-def test_combo_factorial(value1):
-    combo1 = onedigit.Combo(value1)
-
-    combo2 = combo1.unary_operation("!")
-
-    # The class needs to guard against bad input
-    if (value1 < 0) or (value1 > 11):
-        assert combo2.value == 0
-        return
-
-    assert combo2.value == math.factorial(value1)
+        assert combo2.value == math.factorial(value1)

@@ -6,7 +6,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 import math
-from typing import Any, ClassVar, Dict, List
+from typing import Any, Dict, List
 
 
 @dataclasses.dataclass
@@ -16,16 +16,18 @@ class Combo:
     """
 
     value: int
-    cost: int = -1
-    expr_full: str = ""
-    expr_simple: str = ""
-
-    __INF: ClassVar[int] = 10**9
+    cost: int = 0  # (set to 10**9 if empty)
+    expr_full: str = ""  # (set to str(value) if empty)
+    expr_simple: str = ""  # (set to str(value) if empty)
 
     def __post_init__(self):
         """Runs after instantiation of a dataclass object."""
-        if self.cost == -1:
-            self.cost = self.__INF
+        if self.cost == 0:
+            self.cost = 10**9
+        if not self.expr_full:
+            self.expr_full = str(self.value)
+        if not self.expr_simple:
+            self.expr_simple = str(self.value)
 
     def __repr__(self) -> str:
         """
@@ -102,12 +104,12 @@ class Combo:
                 if self.value < 0:
                     # Prevent irrational values
                     return Combo(value=0, expr_full="0", expr_simple="0")
-                rc_val = int(math.sqrt(self.value))
+                rc_val = math.isqrt(self.value)
                 if (rc_val * rc_val) != self.value:
-                    # Only allow expressions that result in integer values
+                    # Only allow expressions that result in exact integer values
                     return Combo(value=0, expr_full="0", expr_simple="0")
-                rc_expr_full = "√" + value1_expr_full
-                rc_expr_simple = "√" + str(rc_val)
+                rc_expr_full = "√(" + value1_expr_full + ")"
+                rc_expr_simple = "√(" + str(self.value) + ")"
             case _:
                 raise ValueError("bad operator:", op)
 
@@ -210,7 +212,7 @@ class Model:
                 inside. (Look at Model.copy()). Defaults to False.
         Raises:
             ValueError: if digit value is out of range [1,9]
-            ValueError: if upper value is too large (more than 10,000).
+            ValueError: if max value is too large (more than 1M).
         """
 
         self.logger = logging.getLogger("model")
@@ -228,7 +230,7 @@ class Model:
         self.digit = digit
 
         if not isinstance(max_value, int) or not (1 <= max_value <= 1_000_000):
-            raise ValueError("upper value must be a positive number below 1M.")
+            raise ValueError("max value must be a positive number below 1M.")
         self.max_value = max_value
 
         if not isinstance(max_cost, int) or not (1 <= max_cost <= 30):
