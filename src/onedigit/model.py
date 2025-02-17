@@ -12,7 +12,15 @@ from typing import Any, Dict, List
 @dataclasses.dataclass
 class Combo:
     """
-    Represents an arithmetic combination.
+    Represents an arithmetic combination using a single digit.
+
+    Args:
+        value (int): value of the expression after evaluation.
+        cost (int): number of times the digit is used in the expression.
+        expr_full (str): string representing the instruction.
+        expr_simple (str): string representing a simplified expression
+            of the last value(s) and operand that were used to generate
+            this expression.
     """
 
     value: int
@@ -21,7 +29,7 @@ class Combo:
     expr_simple: str = ""  # (set to str(value) if empty)
 
     def __post_init__(self):
-        """Runs after instantiation of a dataclass object."""
+        """Run after instantiation of a dataclass object."""
         if self.cost == 0:
             self.cost = 10**9
         if not self.expr_full:
@@ -40,7 +48,7 @@ class Combo:
 
     def __lt__(self, other: Combo) -> bool:
         """
-        Compares this combination against another.
+        Compare the order of this combination against another.
 
         This function is used by Python to sort containers
         with this type of objects.
@@ -56,7 +64,7 @@ class Combo:
 
     def asdict(self) -> dict[str, Any]:
         """
-        Creates a dictionary representation of the Combo object.
+        Create a dictionary representation of the Combo object.
 
         This is needed to serialize the object to JSON.
         It is also used during serialization of the Model object
@@ -94,8 +102,15 @@ class Combo:
 
         match op:
             case "!":
-                if (self.value < 0) or (self.value > 11):
+                if (self.value < 0) or (self.value > 20):
+                    # FIXME: This is an opaque value in the implementation
+                    # FIXME: See how to clean this up.
                     # Prevent illogical or gigantic values in calculations
+                    # Value: 20! is 2x10^18 ,  62-bits
+                    #        21! is         ,  66-bits
+                    #        24! is         ,  80-bits
+                    #        30! is         , 108-bits
+                    #        34! is         , 128-bits
                     return Combo(value=0, expr_full="0", expr_simple="0")
                 rc_val = math.factorial(self.value)
                 rc_expr_full = value1_expr_full + "!"
@@ -186,9 +201,7 @@ class Combo:
 
 
 class Model:
-    """
-    A onedigit simulation.
-    """
+    """Model the space for expressions using a single digit."""
 
     digit: int
     max_value: int
@@ -270,7 +283,7 @@ class Model:
         return new_model
 
     def fromdict(self, input: dict):
-        """Create a Model object from a dictionary
+        """Create a Model object from a dictionary.
 
         Functions to export an Model to a dictionary, and to create an
         object from a dictionary are used during object serialization. That
@@ -335,7 +348,7 @@ class Model:
 
     def state_merge(self, extra: Model) -> None:
         """
-        Merges combinations from a separate Model into the current model.
+        Merge combinations from a separate Model into the current model.
 
         It picks the best combination for a given value based on cost of
         the full expression.
@@ -415,7 +428,7 @@ class Model:
 
     def asdict(self) -> dict[str, Any]:
         """
-        Creates a dictionary representation of the Model object.
+        Create a dictionary representation of the Model object.
 
         Functions to export an Model to a dictionary, and to create an
         object from a dictionary are used during object serialization. That
