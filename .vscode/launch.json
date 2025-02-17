@@ -13,6 +13,14 @@
             "args": [
                 "${command:pickArgs}"
             ]
+        },
+        {
+            "name": "Python Debugger: very simple simulation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "calculate.py",
+            "console": "integratedTerminal",
+            "args": [ "--digit", "3", "--upper", "39", "--steps", "1" ]
         }
     ]
 }

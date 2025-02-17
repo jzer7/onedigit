@@ -21,14 +21,14 @@ class Test_Model(unittest.TestCase):
         assert isinstance(model.digit, int)
         assert model.digit == digit
 
-        assert isinstance(model.state, list)
+        assert isinstance(model.state, dict)
         assert len(model.state) > 0
-        assert isinstance(model.state[0], onedigit.Combo)
 
         # At least we should have a combination for the digit itself
+        assert digit in model.state
         assert model.state[digit] is not None
         assert isinstance(model.state[digit], onedigit.Combo)
-        assert model.state[digit].exists()
+        assert model.state[digit].value == digit
 
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_creation_good(self, digit):
