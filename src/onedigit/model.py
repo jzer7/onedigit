@@ -189,19 +189,23 @@ class Model:
     """
 
     digit: int
-    upper_value: int
+    max_value: int
+    max_cost: int
     state: Dict[int, Combo]
     logger: logging.Logger
 
-    def __init__(self, digit: int, upper_value: int = 100, empty: bool = False):
+    def __init__(self, digit: int, max_value: int, max_cost: int, *, shallow: bool = False):
         """
         Build a model for the game simulation.
 
         Args:
             digit (int): digit to use when creating expresions
-            upper_value (int, optional): upper limit of values the model
-                retains. Defaults to 100.
-            empty (bool, optional): leave object uninitialized. Useful
+            max_value (int, optional): upper limit of values the model
+                retains.
+            max_cost (int, optional): maximum cost a combination can
+                have, for the simulation to use it to generate other
+                combinations.
+            shallow (bool, optional): leave object uninitialized. Useful
                 when the plan is to copy values from a different object
                 inside. (Look at Model.copy()). Defaults to False.
         Raises:
@@ -216,16 +220,20 @@ class Model:
         # In some cases, we need to skip the rest of the initialization.
         # For example if this is a shallow object that will be used to
         # receive a full copy of another object.
-        if empty:
+        if shallow:
             return
 
         if not isinstance(digit, int) or not (1 <= digit <= 9):
             raise ValueError("digit must be an integer between 1 and 9, inclusive.")
         self.digit = digit
 
-        if not isinstance(upper_value, int) or not (0 <= upper_value <= 10_000):
-            raise ValueError("upper value must be a positive number below 10k.")
-        self.upper_value = upper_value
+        if not isinstance(max_value, int) or not (1 <= max_value <= 1_000_000):
+            raise ValueError("upper value must be a positive number below 1M.")
+        self.max_value = max_value
+
+        if not isinstance(max_cost, int) or not (1 <= max_cost <= 30):
+            raise ValueError("maximum cost must be a positive number below 30.")
+        self.max_cost = max_cost
 
         self.state = {}
 
@@ -235,7 +243,7 @@ class Model:
         # Allow expressions for joint digits (say, 22, two 2s)
         if 1 <= digit <= 9:
             num, expr, cost = digit, str(digit), 1
-            while num <= upper_value:
+            while (num <= self.max_value) and (cost <= self.max_cost):
                 self.state[num] = Combo(value=num, cost=cost, expr_full=expr, expr_simple=expr)
 
                 num, expr, cost = 10 * num + digit, expr + str(digit), cost + 1
@@ -251,9 +259,10 @@ class Model:
         Returns:
             Model: a new Model object
         """
-        new_model = Model(0, 0, empty=True)
+        new_model = Model(digit=0, max_value=0, max_cost=0, shallow=True)
         new_model.digit = self.digit
-        new_model.upper_value = self.upper_value
+        new_model.max_value = self.max_value
+        new_model.max_cost = self.max_cost
         new_model.state = self.state.copy()
         new_model.logger = self.logger
         return new_model
@@ -271,12 +280,14 @@ class Model:
         Raises:
             ValueError: _description_
         """
-        if ("digit" not in input) or ("upper_value" not in input) or ("state" not in input):
-            raise ValueError("input dictionary is missing keys.")
+        for k in ["digit", "max_value", "max_cost", "state"]:
+            if k not in input:
+                raise ValueError(f"input dictionary is missing key {k}")
 
-        new_model = Model(0, 0, empty=True)
+        new_model = Model(digit=0, max_value=0, max_cost=0, shallow=True)
         new_model.digit = input["digit"]
-        new_model.upper_value = input["upper_value"]
+        new_model.max_value = input["max_value"]
+        new_model.max_cost = input["max_cost"]
         new_model.state = input["state"]
 
     def __repr__(self) -> str:
@@ -286,9 +297,9 @@ class Model:
         Returns:
             str: string representation of the Model object
         """
-        return f"Model(digit={self.digit}, upper_value={self.upper_value})"
+        return f"Model(digit={self.digit}, max_value={self.max_value}, max_cost={self.max_cost})"
 
-    def state_update(self, candidate: Combo, *, max_cost: int = 20) -> bool:
+    def state_update(self, candidate: Combo) -> bool:
         """
         Attempt addition of a single combination to the existing state.
 
@@ -297,8 +308,6 @@ class Model:
 
         Args:
             candidate (Combo): combination to add
-            max_cost (int, optional): highest cost for combination
-                the model will accept. Defaults to 20.
 
         Returns:
             bool: True if the update was valid.
@@ -306,13 +315,13 @@ class Model:
 
         self.logger.debug("Model.state_update()")
 
-        if candidate.cost > max_cost:
+        if candidate.cost > self.max_cost:
             return False
 
         value, cost = candidate.value, candidate.cost
 
         # Are we keeping track of this value?
-        if not (1 <= value <= self.upper_value):
+        if not (1 <= value <= self.max_value):
             return False
 
         # There was no improvement in cost
@@ -322,7 +331,7 @@ class Model:
         self.state[value] = candidate
         return True
 
-    def state_merge(self, extra: Model, *, max_cost: int = 20) -> None:
+    def state_merge(self, extra: Model) -> None:
         """
         Merges combinations from a separate Model into the current model.
 
@@ -331,8 +340,6 @@ class Model:
 
         Args:
             extra (Model): model with combinations to be added to this model
-            max_cost (int, optional): highest cost for combination
-                the model will accept. Defaults to 20.
         """
 
         self.logger.debug("Model.state_merge()")
@@ -341,9 +348,9 @@ class Model:
             val2, cost2 = combo2.value, combo2.cost
 
             if (
-                cost2 > max_cost
+                cost2 > self.max_cost
                 or val2 < 1
-                or val2 >= self.upper_value
+                or val2 >= self.max_value
                 or (val2 in self.state and self.state[val2].cost <= cost2)
             ):
                 continue
@@ -415,4 +422,9 @@ class Model:
         Returns:
             dict[str, Any]: dictionary with the dataclass fields.
         """
-        return {"digit": self.digit, "upper_value": self.upper_value, "state": self.state.copy()}
+        return {
+            "digit": self.digit,
+            "max_value": self.max_value,
+            "max_cost": self.max_cost,
+            "state": self.state.copy(),
+        }

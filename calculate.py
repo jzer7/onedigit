@@ -15,10 +15,11 @@ __logger = logging.getLogger("cli")
 
 
 def calculate(
-    digit: int = 9,
-    upper: int = 90,
+    digit: int,
     *,
-    steps: int = 10,
+    max_value: int = 9999,
+    max_cost: int = 12,
+    max_steps: int = 10,
     full: bool = False,
     output: str = "text",
 ) -> bool:
@@ -26,9 +27,10 @@ def calculate(
     Command line interface to calculate combinations using a given digit.
 
     Args:
-        digit (int): the digit to use to generate combinations
-        upper (int): upper limit is the last number that is calculated
-        steps (int, optional): maximum number of generative rounds. Defaults to 10.
+        digit (int): the digit to use to generate combinations.
+        max_value (int, optional): largest value for a combination to be shown in the output. Defaults to 9999.
+        max_cost (int, optional): maximum cost a combination can have for it to be remembered. Defaults to 12.
+        max_steps (int, optional): maximum number of generative rounds. Defaults to 10.
         full (bool, optional): display combinations using full expressios. Defaults to False.
         output (str, optional): format for the output (text/json). Defaults to "text".
 
@@ -37,7 +39,7 @@ def calculate(
     """
 
     __logger.debug(
-        f"calculate(digit={type(digit).__name__}({digit}), upper={type(upper).__name__}({upper}), steps={type(steps).__name__}({steps}), output={type(output).__name__}({output}))"
+        f"calculate(digit={type(digit).__name__}({digit}), max_value={type(max_value).__name__}({max_value}), max_steps={type(max_steps).__name__}({max_steps}), max_cost={type(max_cost).__name__}({max_cost}), output={type(output).__name__}({output}))"
     )
 
     # ------------------------------------------------------------
@@ -45,10 +47,11 @@ def calculate(
     # sanitation.
     try:
         digit = int(digit)
-        upper = int(upper)
-        steps = int(steps)
+        max_value = int(max_value)
+        max_cost = int(max_cost)
+        max_steps = int(max_steps)
     except ValueError:
-        __logger.error("digit, upper and steps must be positive integer numbers")
+        __logger.error("digit, max_value, max_cost, and max_steps must be positive integer numbers")
         return False
 
     if not (1 <= digit <= 9):
@@ -64,7 +67,7 @@ def calculate(
         return False
 
     # ------------------------------------------------------------
-    combos = onedigit.calculate(digit=digit, upper_value=upper, steps=steps)
+    combos = onedigit.calculate(digit=digit, max_value=max_value, max_cost=max_cost, max_steps=max_steps)
     if output == "text":
         for c in combos:
             if full:
