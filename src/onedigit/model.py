@@ -6,7 +6,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 import math
-from typing import Any, ClassVar, List
+from typing import Any, ClassVar, Dict, List
 
 
 @dataclasses.dataclass
@@ -26,15 +26,6 @@ class Combo:
         """Runs after instantiation of a dataclass object."""
         if self.cost == -1:
             self.cost = self.__INF
-
-    def exists(self) -> bool:
-        """
-        Check if a solution exists to produce this value.
-
-        Returns:
-            bool: True if this is a valid combination
-        """
-        return self.cost < self.__INF
 
     def __repr__(self) -> str:
         """
@@ -196,7 +187,7 @@ class Model:
 
     digit: int
     upper_value: int
-    state: List[Combo]
+    state: Dict[int, Combo]
     logger: logging.Logger
 
     def __init__(self, digit: int, upper_value: int = 100, empty: bool = False):
@@ -233,27 +224,18 @@ class Model:
             raise ValueError("upper value must be a positive number below 10k.")
         self.upper_value = upper_value
 
-        combos = [Combo(value=i) for i in range(upper_value + 1)]
+        self.state = {}
 
         # Set up the digit for the simulation
-        combos[digit].expr_full = combos[digit].expr_simple = str(digit)
-        combos[digit].cost = 1
-
-        # Allow an expression for `1`
-        combos[1].expr_full = f"{digit}/{digit}"
-        combos[1].expr_simple = str(1)
-        combos[1].cost = 2
+        self.state[digit] = Combo(value=digit, cost=1, expr_full=str(digit), expr_simple=str(digit))
 
         # Allow expressions for joint digits (say, 22, two 2s)
         if 1 <= digit <= 9:
             num, expr, cost = digit, str(digit), 1
             while num <= upper_value:
-                combos[num].expr_full = combos[num].expr_simple = expr
-                combos[num].cost = cost
+                self.state[num] = Combo(value=num, cost=cost, expr_full=expr, expr_simple=expr)
 
                 num, expr, cost = 10 * num + digit, expr + str(digit), cost + 1
-
-        self.state = combos
 
     def copy(self) -> Model:
         """Create a new object with all information about this model.
@@ -306,11 +288,11 @@ class Model:
         value, cost = candidate.value, candidate.cost
 
         # Are we keeping track of this value?
-        if not (1 < value < len(self.state)):
+        if not (1 <= value <= self.upper_value):
             return False
 
         # There was no improvement in cost
-        if self.state[value].exists() and self.state[value].cost <= cost:
+        if (value in self.state) and (self.state[value].cost <= cost):
             return False
 
         self.state[value] = candidate
@@ -337,9 +319,8 @@ class Model:
             if (
                 cost2 > max_cost
                 or val2 < 1
-                or val2 >= len(self.state)
-                or self.state[val2].exists()
-                and self.state[val2].cost <= cost2
+                or val2 >= self.upper_value
+                or (val2 in self.state and self.state[val2].cost <= cost2)
             ):
                 continue
             else:
@@ -359,7 +340,7 @@ class Model:
             int: number of values that were updated
         """
 
-        known = [s for s in self.state if s.exists()]
+        known = list(self.state.values())
         known.sort(key=lambda c: c.value)
         new_combos = self.copy()
 
@@ -397,4 +378,4 @@ class Model:
         Returns:
             List[Combo]: list of valid Combo objects
         """
-        return [s for s in self.state if s.exists()]
+        return list(self.state.values())
