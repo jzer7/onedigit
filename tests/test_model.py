@@ -34,19 +34,19 @@ class Test_Model(unittest.TestCase):
     def test_model_creation_good(self, digit):
 
         # Good digit
-        model = onedigit.Model(digit=digit)
+        model = onedigit.Model(digit=digit, max_value=99, max_cost=4)
         self.check_model(model, digit)
 
     @given(digit=hst.integers(min_value=10))
     def test_model_creation_bad(self, digit):
         # Bad digit
         with self.assertRaises(expected_exception=ValueError):
-            model = onedigit.Model(digit=digit)
+            model = onedigit.Model(digit=digit, max_value=99, max_cost=4)
 
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_copy(self, digit):
         # Create a copy and delete the original
-        model1 = onedigit.Model(digit=digit)
+        model1 = onedigit.Model(digit=digit, max_value=99, max_cost=4)
         model2 = model1.copy()
         del model1
 
