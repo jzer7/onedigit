@@ -3,6 +3,7 @@
         "**/__pycache__": true,
         "**/.pytest_cache": true,
         "**/pdm.lock": true,
+        "**/.coverage": true,
         "**/.hypothesis": true,
         "**/.mypy_cache": true,
         "**/.pdm-build": true,
