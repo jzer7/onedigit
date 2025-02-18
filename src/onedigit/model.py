@@ -103,26 +103,25 @@ class Combo:
         match op:
             case "!":
                 if (self.value < 0) or (self.value > 20):
-                    # FIXME: This is an opaque value in the implementation
-                    # FIXME: See how to clean this up.
+                    # FIXME: This is an opaque value. See how to clean this up.
                     # Prevent illogical or gigantic values in calculations
                     # Value: 20! is 2x10^18 ,  62-bits
                     #        21! is         ,  66-bits
                     #        24! is         ,  80-bits
                     #        30! is         , 108-bits
                     #        34! is         , 128-bits
-                    return Combo(value=0, expr_full="0", expr_simple="0")
+                    return Combo(value=0)
                 rc_val = math.factorial(self.value)
                 rc_expr_full = value1_expr_full + "!"
                 rc_expr_simple = str(rc_val) + "!"
             case "sqrt":
                 if self.value < 0:
                     # Prevent irrational values
-                    return Combo(value=0, expr_full="0", expr_simple="0")
+                    return Combo(value=0)
                 rc_val = math.isqrt(self.value)
                 if (rc_val * rc_val) != self.value:
                     # Only allow expressions that result in exact integer values
-                    return Combo(value=0, expr_full="0", expr_simple="0")
+                    return Combo(value=0)
                 rc_expr_full = "√(" + value1_expr_full + ")"
                 rc_expr_simple = "√(" + str(self.value) + ")"
             case _:
@@ -180,15 +179,19 @@ class Combo:
 
             case "/":
                 if self.value % combo2.value != 0:
-                    return Combo(value=0, expr_full="0", expr_simple="0")
+                    return Combo(value=0)
 
                 rc_val = self.value // combo2.value
                 rc_expr_full = f"{value1_expr_full} / {value2_expr_full}"
                 rc_expr_simple = f"{self.value} / {combo2.value}"
 
             case "^":
-                if self.value <= 1 or combo2.value > 10:
-                    return Combo(value=0, expr_full="0", expr_simple="0")
+                # FIXME: This is an opaque value. See how to clean this up.
+                # Prevent illogical or gigantic values in calculations
+                # Value: 9^20 is 1.2x10^19,  64-bits
+                #        9^40 is 1.4x10^38, 127-bits
+                if self.value < 0 or combo2.value > 40:
+                    return Combo(value=0)
 
                 rc_val = self.value**combo2.value
                 rc_expr_full = f"{value1_expr_full} ^ {value2_expr_full}"
