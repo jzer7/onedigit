@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """CLI to calculate number combinations with a single digit."""
 
+import datetime
 import json
 import logging
 import logging.handlers
@@ -18,10 +19,10 @@ def calculate(
     digit: int,
     *,
     max_value: int = 9999,
-    max_cost: int = 12,
-    max_steps: int = 10,
+    max_cost: int = 2,
+    max_steps: int = 5,
     full: bool = False,
-    output: str = "text",
+    output_filename: str = "",
 ) -> bool:
     """
     Command line interface to calculate combinations using a given digit.
@@ -29,17 +30,21 @@ def calculate(
     Args:
         digit (int): the digit to use to generate combinations.
         max_value (int, optional): largest value for a combination to be shown in the output. Defaults to 9999.
-        max_cost (int, optional): maximum cost a combination can have for it to be remembered. Defaults to 12.
-        max_steps (int, optional): maximum number of generative rounds. Defaults to 10.
-        full (bool, optional): display combinations using full expressios. Defaults to False.
-        output (str, optional): format for the output (text/json). Defaults to "text".
+        max_cost (int, optional): maximum cost a combination can have for it to be remembered. Defaults to 2.
+        max_steps (int, optional): maximum number of generative rounds. Defaults to 5.
+        full (bool, optional): display combinations using full expressions. Defaults to False.
+        output_filename (str, optional): JSON file used to store the model upon completion. If not filename is provided, a random filename will be used. Empty by default.
 
     Returns:
         bool: True if calculation runs without issues.
     """
 
     __logger.debug(
-        f"calculate(digit={type(digit).__name__}({digit}), max_value={type(max_value).__name__}({max_value}), max_steps={type(max_steps).__name__}({max_steps}), max_cost={type(max_cost).__name__}({max_cost}), output={type(output).__name__}({output}))"
+        f"calculate(digit={type(digit).__name__}({digit}), "
+        f"max_value={type(max_value).__name__}({max_value}), "
+        f"max_steps={type(max_steps).__name__}({max_steps}), "
+        f"max_cost={type(max_cost).__name__}({max_cost}), "
+        f"output_filename={type(output_filename).__name__}({output_filename})"
     )
 
     # ------------------------------------------------------------
@@ -58,29 +63,51 @@ def calculate(
         __logger.error("digit must be an integer number between 1 and 9")
         return False
 
-    if isinstance(output, str):
-        output = output.lower()
-    else:
-        output = ""
-    if output not in ["text", "json"]:
-        __logger.error("output must be 'text' or 'json'")
-        return False
+    # ------------------------------------------------------------
+    if not isinstance(output_filename, str):
+        __logger.error("output_filename is not valid")
+    if not output_filename:
+        tz = datetime.UTC
+        t = datetime.datetime.now(tz)
+        output_filename = "model" + "." + t.strftime("%Y%m%d%H%M%S") + ".json"
 
     # ------------------------------------------------------------
-    combos = onedigit.calculate(digit=digit, max_value=max_value, max_cost=max_cost, max_steps=max_steps)
-    if output == "text":
-        for c in combos:
-            if full:
-                print(f"{c.value:>4} = {c.expr_full:<70}   [{c.cost:>3}]")
-            else:
-                print(f"{c.value:>4} = {c.expr_simple:<15}   [{c.cost:>3}]")
-    elif output == "json":
-        cc = []
-        for c in combos:
-            cc.append(c.asdict())
+    # Start calculation
+    model = onedigit.calculate(
+       digit=digit, max_value=max_value, max_cost=max_cost, max_steps=max_steps
+    )
+
+    # ------------------------------------------------------------
+    # Get the combinations
+    combos = []
+    if not model:
+        __logger.error("failure creating and running model")
+        return False
+    else:
+        combos = sorted(model.state.values())
+
+    # ------------------------------------------------------------
+    # Take care of outputs
+    if output_filename:
+        # Represent model in JSON format
+        model_dict = model.asdict()
         jsenc = json.JSONEncoder()
-        jstxt = jsenc.encode(cc)
-        print(jstxt)
+        jstxt = jsenc.encode(model_dict)
+
+        # Write the whole model to a file
+        with open(output_filename, mode="w", encoding="utf-8") as output_fp:
+            output_fp.write(jstxt)
+
+    # ------------------------------------------------------------
+    # Output to terminal
+    cc = []
+    for c in combos:
+        cc.append(c.asdict())
+    for c in combos:
+        if full:
+            print(f"{c.value:>4} = {c.expr_full:<70}   [{c.cost:>3}]")
+        else:
+            print(f"{c.value:>4} = {c.expr_simple:<15}   [{c.cost:>3}]")
 
     return True
 

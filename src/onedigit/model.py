@@ -440,9 +440,9 @@ class Model:
         Returns:
             dict[str, Any]: dictionary with the dataclass fields.
         """
-        return {
-            "digit": self.digit,
-            "max_value": self.max_value,
-            "max_cost": self.max_cost,
-            "state": self.state.copy(),
-        }
+        state = {}
+        for k, v in self.state.items():
+            state[k] = v.asdict()
+
+        obj = {"digit": self.digit, "max_value": self.max_value, "max_cost": self.max_cost, "state": state}
+        return obj
