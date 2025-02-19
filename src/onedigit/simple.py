@@ -1,7 +1,6 @@
 """Functionality for easy access. It schedules the operations that calculate the combinations."""
 
 import logging
-from typing import List
 
 from onedigit import model
 
@@ -9,7 +8,7 @@ __logger = logging.getLogger("simple")
 __logger.setLevel(logging.INFO)
 
 
-def calculate(digit: int, *, max_value: int = 9999, max_cost: int = 10, max_steps: int = 10) -> List[model.Combo]:
+def calculate(digit: int, *, max_value: int = 9999, max_cost: int = 10, max_steps: int = 10) -> model.Model | None:
     """
     Run a simple calculation.
 
@@ -20,14 +19,17 @@ def calculate(digit: int, *, max_value: int = 9999, max_cost: int = 10, max_step
         max_steps (int, optional): maximum number of steps (iterations) to run. Defaults to 10.
 
     Returns:
-        List[model.Combo]: combinations generated.
+        model.Model: model object, or None if there is a failure.
     """
 
     __logger.debug(f"calculate(digit={digit},max_value={max_value},max_cost={max_cost},max_steps={max_steps})")
 
     state = model.Model(digit=digit, max_value=max_value, max_cost=max_cost)
+    state = advance(state=state, max_steps=max_steps)
+    if not state:
+        return None
 
-    return advance(state=state, max_steps=max_steps).get_valid_combos()
+    return state
 
 
 def advance(state: model.Model, max_steps: int = 10) -> model.Model:
