@@ -86,11 +86,21 @@ def calculate(
     # Check if there is input data
     input_text = ""
     if input_filename:
-        with open(input_filename, mode="r", encoding="utf-8") as input_fp:
-            input_lines = input_fp.readlines()
+        input_lines = []
+        try:
+            with open(input_filename, mode="r", encoding="utf-8") as input_fp:
+                input_lines = input_fp.readlines()
+        except FileNotFoundError:
+            __logger.error(f"The input file '{input_filename}' does not exist.")
+        except PermissionError:
+            __logger.error(f"No permissions to open the input file '{input_filename}'.")
+        except ValueError:
+            __logger.error(f"Unknown error opening the input file '{input_filename}'.")
+
         if not input_lines:
-            __logger.error(f"failed to read data from input file '{input_filename}'.")
-        input_text = "".join(input_lines)
+            __logger.error(f"failed to read input file '{input_filename}', simulation will use a fresh model.")
+        else:
+            input_text = "".join(input_lines)
         del input_lines
 
     # Start calculation
@@ -117,11 +127,11 @@ def calculate(
         jstxt = jsenc.encode(model_dict)
 
         # Write the whole model to a file
-        with open(output_filename, mode="w", encoding="utf-8") as output_fp:
-            output_fp.write(jstxt)
-
-        # if not output_fp:
-        #     __logger.error(f"failed to open output file '{output_filename}' in write mode.")
+        try:
+            with open(output_filename, mode="w", encoding="utf-8") as output_fp:
+                output_fp.write(jstxt)
+        except PermissionError:
+            __logger.error(f"failed to open output file '{output_filename}' in write mode.")
 
     # ------------------------------------------------------------
     # Output to terminal

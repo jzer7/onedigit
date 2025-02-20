@@ -23,6 +23,13 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 
+[tool.coverage.run]
+
+[tool.coverage.report]
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
 [tool.pdm]
 
 [tool.pdm.version]
