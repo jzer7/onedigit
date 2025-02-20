@@ -27,6 +27,21 @@
                 "--max_steps", "2",
                 "--output_filename", "simple_run.json"
             ]
+        },
+        {
+            "name": "Python Debugger: load and simulate",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "calculate.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--digit", "3",
+                "--max_value", "70",
+                "--max_cost", "3",
+                "--max_steps", "2",
+                "--input_filename", "simple_3.json",
+                "--output_filename", "load_and_simulate.json"
+            ]
         }
     ]
 }

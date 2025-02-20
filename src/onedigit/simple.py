@@ -1,5 +1,6 @@
 """Functionality for easy access. It schedules the operations that calculate the combinations."""
 
+import json
 import logging
 
 from onedigit import model
@@ -8,7 +9,9 @@ __logger = logging.getLogger("simple")
 __logger.setLevel(logging.INFO)
 
 
-def calculate(digit: int, *, max_value: int = 9999, max_cost: int = 10, max_steps: int = 10) -> model.Model | None:
+def calculate(
+    digit: int, *, max_value: int = 9999, max_cost: int = 10, max_steps: int = 10, input_json: str
+) -> model.Model | None:
     """
     Run a simple calculation.
 
@@ -17,13 +20,14 @@ def calculate(digit: int, *, max_value: int = 9999, max_cost: int = 10, max_step
         max_number (int, optional): largest value to remember. Defaults to 9999.
         max_cost (int, optional): maximum cost a combination can have to be remembered. Defaults to 10.
         max_steps (int, optional): maximum number of steps (iterations) to run. Defaults to 10.
+        input_json (str, optional): JSON model data. Defaults to empty.
 
     Returns:
         model.Model: model object, or None if there is a failure.
     """
     __logger.debug(f"calculate(digit={digit}, max_value={max_value}, max_cost={max_cost}, max_steps={max_steps})")
 
-    mymodel = get_model(digit=digit, max_value=max_value, max_cost=max_cost)
+    mymodel = get_model(digit=digit, max_value=max_value, max_cost=max_cost, input_json=input_json)
     if not mymodel:
         return None
 
@@ -34,14 +38,41 @@ def calculate(digit: int, *, max_value: int = 9999, max_cost: int = 10, max_step
     return mymodel
 
 
-def get_model(digit: int, *, max_value: int = 9999, max_cost: int = 2) -> model.Model | None:
+def get_model(digit: int, *, max_value: int = 9999, max_cost: int = 2, input_json: str = "") -> model.Model | None:
     """
     Obtain an initial model.
 
+    If valid JSON data is provided, the model is built from it.
+    Otherwise a fresh model is created.
+
+    Args:
+
+    Returns:
+        onedigit.model.Model: a model, or None.
     """
-    __logger.debug(f"get_model(digit={digit}, max_value={max_value}, max_cost={max_cost})")
+    __logger.debug(
+        f"get_model(digit={digit}, max_value={max_value}, max_cost={max_cost}, input_json={len(input_json)} chars)"
+    )
     # Build a blank model
     mymodel = model.Model(digit=digit)
+
+    # Parse the input JSON
+    if mymodel and input_json:
+        json_dec = json.JSONDecoder()
+        input_dict = json_dec.decode(input_json)
+
+        if input_dict:
+            # Ingest the actual dictionary
+            try:
+                mymodel2 = model.Model.fromdict(input=input_dict)
+            except ValueError as e:
+                __logger.error("failed to import model:", e)
+        if mymodel2.digit == digit:
+            mymodel = mymodel2
+        else:
+            __logger.error(
+                f"requested model for digit={digit}, ignoring imported model as it has digit={mymodel2.digit}"
+            )
 
     if not mymodel:
         __logger.error("unable to build a model")
