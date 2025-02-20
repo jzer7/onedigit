@@ -440,9 +440,9 @@ class Model:
         Returns:
             dict[str, Any]: dictionary with the dataclass fields.
         """
-        state = {}
-        for k, v in self.state.items():
-            state[k] = v.asdict()
+        state = []
+        for num in sorted(self.state.keys()):
+            state.append(self.state[num].asdict())
 
-        obj = {"digit": self.digit, "max_value": self.max_value, "max_cost": self.max_cost, "state": state}
+        obj = {"digit": self.digit, "max_cost": self.max_cost, "max_value": self.max_value, "combinations": state}
         return obj

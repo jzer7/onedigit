@@ -42,6 +42,34 @@ class Test_Combo(unittest.TestCase):
         combo1 = onedigit.Combo(value1)
         self.check_combo(combo1, value1)
 
+    # For serialization
+    @given(value=hst.integers(min_value=1), cost=hst.integers(min_value=1))
+    def test_combo_to_dictionary(self, value: int, cost: int):
+        # Create a simple combo, and get its dictionary
+        combo1 = onedigit.Combo(value=value, cost=cost, expr_full=str(value), expr_simple=str(value))
+        dict1 = combo1.asdict()
+
+        # Verify dictionary
+        assert dict1 is not None
+        assert isinstance(dict1, dict)
+
+        # Verify fields
+        assert "value" in dict1
+        assert isinstance(dict1["value"], int)
+        assert dict1["value"] == value
+
+        assert "cost" in dict1
+        assert isinstance(dict1["cost"], int)
+        assert dict1["cost"] == cost
+
+        assert "expr_full" in dict1
+        assert isinstance(dict1["expr_full"], str)
+        assert dict1["expr_full"] == str(value)
+
+        assert "expr_simple" in dict1
+        assert isinstance(dict1["expr_simple"], str)
+        assert dict1["expr_simple"] == str(value)
+
     @given(value1=hst.integers())
     def test_combo_repr(self, value1: int):
         combo1 = onedigit.Combo(value1)

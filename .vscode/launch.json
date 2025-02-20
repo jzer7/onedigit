@@ -15,12 +15,18 @@
             ]
         },
         {
-            "name": "Python Debugger: very simple simulation",
+            "name": "Python Debugger: tiny onedigit simulation",
             "type": "debugpy",
             "request": "launch",
             "program": "calculate.py",
             "console": "integratedTerminal",
-            "args": [ "--digit", "3", "--upper", "39", "--steps", "1" ]
+            "args": [
+                "--digit", "3",
+                "--max_value", "70",
+                "--max_cost", "3",
+                "--max_steps", "2",
+                "--output_filename", "simple_run.json"
+            ]
         }
     ]
 }

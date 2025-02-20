@@ -148,7 +148,15 @@ class Test_Model(unittest.TestCase):
         assert dict1 is not None
         assert isinstance(dict1, dict)
 
+        # Verify fields
         assert "digit" in dict1
+        assert isinstance(dict1["digit"], int)
+        assert dict1["digit"] == digit
+
         assert "max_value" in dict1
+        assert isinstance(dict1["max_value"], int)
         assert "max_cost" in dict1
-        assert "state" in dict1
+        assert isinstance(dict1["max_cost"], int)
+        assert "combinations" in dict1
+        assert isinstance(dict1["combinations"], list)
+        assert len(dict1["combinations"]) >= 1

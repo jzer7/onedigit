@@ -38,7 +38,6 @@ def calculate(
     Returns:
         bool: True if calculation runs without issues.
     """
-
     __logger.debug(
         f"calculate(digit={type(digit).__name__}({digit}), "
         f"max_value={type(max_value).__name__}({max_value}), "
@@ -74,7 +73,7 @@ def calculate(
     # ------------------------------------------------------------
     # Start calculation
     model = onedigit.calculate(
-       digit=digit, max_value=max_value, max_cost=max_cost, max_steps=max_steps
+        digit=digit, max_value=max_value, max_cost=max_cost, max_steps=max_steps
     )
 
     # ------------------------------------------------------------
