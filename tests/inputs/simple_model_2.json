@@ -1,0 +1,18 @@
+{
+  "digit": 2,
+  "max_cost": 3,
+  "max_value": 30,
+  "combinations": [
+    { "value":     1, "cost": 2, "expr_full": "2 / 2",       "expr_simple": "2 / 2" },
+    { "value":     2, "cost": 1, "expr_full": "2",           "expr_simple": "2" },
+    { "value":     3, "cost": 3, "expr_full": "2 + (2 / 2)", "expr_simple": "2 + 1" },
+    { "value":     4, "cost": 2, "expr_full": "2 + 2",       "expr_simple": "2 + 2" },
+    { "value":     6, "cost": 3, "expr_full": "(2 + 2) + 2", "expr_simple": "4 + 2" },
+    { "value":     8, "cost": 3, "expr_full": "(2 + 2) * 2", "expr_simple": "4 * 2" },
+    { "value":    22, "cost": 2, "expr_full": "22",          "expr_simple": "22" },
+    { "value":    24, "cost": 2, "expr_full": "(2 + 2)!",    "expr_simple": "4!" },
+    { "value":   222, "cost": 3, "expr_full": "222",         "expr_simple": "222" },
+    { "value":  2222, "cost": 4, "expr_full": "2222",        "expr_simple": "2222" },
+    { "value": 22222, "cost": 5, "expr_full": "22222",       "expr_simple": "22222" }
+  ]
+}
