@@ -36,6 +36,16 @@ class Test_Model(unittest.TestCase):
         assert isinstance(model.state[digit], onedigit.Combo)
         assert model.state[digit].value == digit
 
+    def model_match(self, model1: onedigit.Model, model2: onedigit.Model):
+        # But models should be from the same digit space
+        assert model1.digit == model2.digit
+
+        # Verify integrity of the objects
+        self.check_model(model1, model1.digit)
+        self.check_model(model2, model2.digit)
+
+        return False
+
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_creation_good(self, digit: int):
         # Good digit
@@ -112,8 +122,9 @@ class Test_Model(unittest.TestCase):
 
         # Get a copy and delete the original objects
         model2 = model1.copy()
-        del combo1
+        del model1.state
         del model1
+        del combo1
 
         # Verify integrity of the copy, after we have deleted the original
         self.check_model(model2, digit)
@@ -170,3 +181,37 @@ class Test_Model(unittest.TestCase):
         assert "combinations" in dict1
         assert isinstance(dict1["combinations"], list)
         assert len(dict1["combinations"]) >= 1
+
+    @given(digit=hst.integers(min_value=1, max_value=9))
+    def test_model_from_dictionary_basic(self, digit: int):
+        # Create the dictionary of a model
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=99, max_cost=4)
+        dict1 = model1.asdict()
+        # Delete the original object to identify missing info
+        del model1.state
+        del model1
+
+        # Check we can reconstruct the object
+        model2 = onedigit.Model.fromdict(dict1)
+        assert model2 is not None
+
+        # Verify the hydrated Model is valid
+        self.check_model(model2, digit)
+
+    @given(digit=hst.integers(min_value=1, max_value=9))
+    def test_model_from_dictionary(self, digit: int):
+        # Create the dictionary of a model
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=99, max_cost=4)
+        dict1 = model1.asdict()
+
+        # Check we can reconstruct the object
+        model2 = onedigit.Model.fromdict(dict1)
+        assert model2 is not None
+
+        # Verify the hydrated Model matches the original model
+        self.model_match(model1, model2)
+
+        # The reverse relationship must also be satisfied
+        self.model_match(model2, model1)

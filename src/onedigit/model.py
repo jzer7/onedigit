@@ -62,6 +62,43 @@ class Combo:
         assert isinstance(other, Combo)
         return self.value < other.value
 
+    @classmethod
+    def fromdict(cls, input: dict) -> Combo:
+        """Create a Combo object from a dictionary.
+
+        Functions to export an Model to a dictionary, and to create an
+        object from a dictionary are used during object serialization. That
+        functionality is used when taking snapshots of a Model simulation.
+
+        Args:
+            input (dict): dictionary representation of the object
+
+        Raises:
+            ValueError: _description_
+        """
+        # Keys with integer values
+        for k in ["value", "cost"]:
+            if k not in input:
+                raise ValueError(f"input dictionary is missing key '{k}'")
+            v = input[k]
+            if not isinstance(v, int):
+                raise ValueError(f"value associated with key '{k}' must be an integer, but is '{type(v).__name__}'")
+
+        # Keys with string values
+        for k in ["expr_full", "expr_simple"]:
+            if k not in input:
+                raise ValueError(f"input dictionary is missing key '{k}'")
+            v = input[k]
+            if not isinstance(v, str):
+                raise ValueError(f"value associated with key '{k}' must be a string, but is '{type(v).__name__}'")
+
+        value = input["value"]
+        cost = input["cost"]
+        expr_full = input["expr_full"]
+        expr_simple = input["expr_simple"]
+
+        return Combo(value=value, cost=cost, expr_full=expr_full, expr_simple=expr_simple)
+
     def asdict(self) -> dict[str, Any]:
         """
         Create a dictionary representation of the Combo object.
@@ -281,7 +318,8 @@ class Model:
         new_model.logger = self.logger
         return new_model
 
-    def fromdict(self, input: dict):
+    @classmethod
+    def fromdict(cls, input: dict) -> Model:
         """Create a Model object from a dictionary.
 
         Functions to export an Model to a dictionary, and to create an
@@ -294,15 +332,24 @@ class Model:
         Raises:
             ValueError: _description_
         """
-        for k in ["digit", "max_value", "max_cost", "state"]:
+        for k in ["digit", "max_value", "max_cost", "combinations"]:
             if k not in input:
                 raise ValueError(f"input dictionary is missing key {k}")
 
-        new_model = Model(digit=0, max_value=0, max_cost=0, shallow=True)
+        new_model = Model(digit=input["digit"])
         new_model.digit = input["digit"]
         new_model.max_value = input["max_value"]
         new_model.max_cost = input["max_cost"]
-        new_model.state = input["state"]
+        new_model.state = {}
+
+        state = {}
+        for cdict in input["combinations"]:
+            combo = Combo.fromdict(cdict)
+            state[combo.value] = combo
+
+        new_model.state = state
+
+        return new_model
 
     def __repr__(self) -> str:
         """
@@ -362,13 +409,11 @@ class Model:
             val2, cost2 = combo2.value, combo2.cost
 
             if (
-                cost2 > self.max_cost
-                or val2 < 1
-                or val2 >= self.max_value
-                or (val2 in self.state and self.state[val2].cost <= cost2)
+                cost2 <= self.max_cost
+                and val2 >= 1
+                and val2 <= self.max_value
+                and (val2 not in self.state or cost2 < self.state[val2].cost)
             ):
-                continue
-            else:
                 self.state[val2] = combo2
 
     def simulate(self) -> int:

@@ -22,10 +22,17 @@ def calculate(
     max_cost: int = 2,
     max_steps: int = 5,
     full: bool = False,
+    input_filename: str = "",
     output_filename: str = "",
 ) -> bool:
     """
     Command line interface to calculate combinations using a given digit.
+
+    The only value required is 'digit'. All other arguments have default values.
+
+    The input file is a JSON file that describes a model. It can also have results from a previous simulation.
+
+    WARNING: The JSON file must correspond to a model with the same value of 'digit' as the one specified in the command line.
 
     Args:
         digit (int): the digit to use to generate combinations.
@@ -33,6 +40,7 @@ def calculate(
         max_cost (int, optional): maximum cost a combination can have for it to be remembered. Defaults to 2.
         max_steps (int, optional): maximum number of generative rounds. Defaults to 5.
         full (bool, optional): display combinations using full expressions. Defaults to False.
+        input_filename (str, optional): JSON file used to preload the model. Empty by default.
         output_filename (str, optional): JSON file used to store the model upon completion. If not filename is provided, a random filename will be used. Empty by default.
 
     Returns:
@@ -43,6 +51,7 @@ def calculate(
         f"max_value={type(max_value).__name__}({max_value}), "
         f"max_steps={type(max_steps).__name__}({max_steps}), "
         f"max_cost={type(max_cost).__name__}({max_cost}), "
+        f"input_filename={type(input_filename).__name__}({input_filename}), "
         f"output_filename={type(output_filename).__name__}({output_filename})"
     )
 
@@ -63,6 +72,9 @@ def calculate(
         return False
 
     # ------------------------------------------------------------
+    if not isinstance(input_filename, str):
+        __logger.error("input_filename is not valid")
+
     if not isinstance(output_filename, str):
         __logger.error("output_filename is not valid")
     if not output_filename:
@@ -71,10 +83,21 @@ def calculate(
         output_filename = "model" + "." + t.strftime("%Y%m%d%H%M%S") + ".json"
 
     # ------------------------------------------------------------
+    # Check if there is input data
+    input_text = ""
+    if input_filename:
+        with open(input_filename, mode="r", encoding="utf-8") as input_fp:
+            input_lines = input_fp.readlines()
+        if not input_lines:
+            __logger.error(f"failed to read data from input file '{input_filename}'.")
+        input_text = "".join(input_lines)
+        del input_lines
+
     # Start calculation
     model = onedigit.calculate(
-        digit=digit, max_value=max_value, max_cost=max_cost, max_steps=max_steps
+        digit=digit, max_value=max_value, max_cost=max_cost, max_steps=max_steps, input_json=input_text
     )
+    del input_text
 
     # ------------------------------------------------------------
     # Get the combinations
@@ -97,11 +120,11 @@ def calculate(
         with open(output_filename, mode="w", encoding="utf-8") as output_fp:
             output_fp.write(jstxt)
 
+        # if not output_fp:
+        #     __logger.error(f"failed to open output file '{output_filename}' in write mode.")
+
     # ------------------------------------------------------------
     # Output to terminal
-    cc = []
-    for c in combos:
-        cc.append(c.asdict())
     for c in combos:
         if full:
             print(f"{c.value:>4} = {c.expr_full:<70}   [{c.cost:>3}]")
