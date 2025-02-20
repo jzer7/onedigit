@@ -207,44 +207,42 @@ class Model:
     """Model the space for expressions using a single digit."""
 
     digit: int
-    max_value: int
-    max_cost: int
+    max_value: int = 0
+    max_cost: int = 0
     state: Dict[int, Combo]
     logger: logging.Logger
 
-    def __init__(self, digit: int, max_value: int, max_cost: int, *, shallow: bool = False):
+    def __init__(self, digit):
         """
         Build a model for the game simulation.
 
         Args:
             digit (int): digit to use when creating expresions
-            max_value (int, optional): upper limit of values the model
-                retains.
-            max_cost (int, optional): maximum cost a combination can
-                have, for the simulation to use it to generate other
-                combinations.
-            shallow (bool, optional): leave object uninitialized. Useful
-                when the plan is to copy values from a different object
-                inside. (Look at Model.copy()). Defaults to False.
         Raises:
             ValueError: if digit value is out of range [1,9]
-            ValueError: if max value is too large (more than 1M).
         """
 
         self.logger = logging.getLogger("model")
         self.logger.setLevel(logging.INFO)
         self.logger.debug("Model.__init__()")
 
-        # In some cases, we need to skip the rest of the initialization.
-        # For example if this is a shallow object that will be used to
-        # receive a full copy of another object.
-        if shallow:
-            return
-
         if not isinstance(digit, int) or not (1 <= digit <= 9):
             raise ValueError("digit must be an integer between 1 and 9, inclusive.")
         self.digit = digit
 
+        self.state = {}
+
+    def seed(self, *, max_value: int = 0, max_cost: int = 0) -> None:
+        """
+        Args:
+            max_value (int, optional): upper limit of values the model
+                retains.
+            max_cost (int, optional): maximum cost a combination can
+                have, for the simulation to use it to generate other
+                combinations.
+        Raises:
+            ValueError: if max value is too large (more than 1M).
+        """
         if not isinstance(max_value, int) or not (1 <= max_value <= 1_000_000):
             raise ValueError("max value must be a positive number below 1M.")
         self.max_value = max_value
@@ -253,18 +251,16 @@ class Model:
             raise ValueError("maximum cost must be a positive number below 30.")
         self.max_cost = max_cost
 
-        self.state = {}
-
         # Set up the digit for the simulation
-        self.state[digit] = Combo(value=digit, cost=1, expr_full=str(digit), expr_simple=str(digit))
+        self.state[self.digit] = Combo(value=self.digit, cost=1, expr_full=str(self.digit), expr_simple=str(self.digit))
 
         # Allow expressions for joint digits (say, 22, two 2s)
-        if 1 <= digit <= 9:
-            num, expr, cost = digit, str(digit), 1
+        if 1 <= self.digit <= 9:
+            num, expr, cost = self.digit, str(self.digit), 1
             while (num <= self.max_value) and (cost <= self.max_cost):
                 self.state[num] = Combo(value=num, cost=cost, expr_full=expr, expr_simple=expr)
 
-                num, expr, cost = 10 * num + digit, expr + str(digit), cost + 1
+                num, expr, cost = 10 * num + self.digit, expr + str(self.digit), cost + 1
 
     def copy(self) -> Model:
         """Create a new object with all information about this model.
@@ -277,7 +273,7 @@ class Model:
         Returns:
             Model: a new Model object
         """
-        new_model = Model(digit=0, max_value=0, max_cost=0, shallow=True)
+        new_model = Model(digit=self.digit)
         new_model.digit = self.digit
         new_model.max_value = self.max_value
         new_model.max_cost = self.max_cost
