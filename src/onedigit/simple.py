@@ -21,18 +21,39 @@ def calculate(digit: int, *, max_value: int = 9999, max_cost: int = 10, max_step
     Returns:
         model.Model: model object, or None if there is a failure.
     """
+    __logger.debug(f"calculate(digit={digit}, max_value={max_value}, max_cost={max_cost}, max_steps={max_steps})")
 
-    __logger.debug(f"calculate(digit={digit},max_value={max_value},max_cost={max_cost},max_steps={max_steps})")
-
-    state = model.Model(digit=digit, max_value=max_value, max_cost=max_cost)
-    state = advance(state=state, max_steps=max_steps)
-    if not state:
+    mymodel = get_model(digit=digit, max_value=max_value, max_cost=max_cost)
+    if not mymodel:
         return None
 
-    return state
+    mymodel = advance(mymodel=mymodel, max_steps=max_steps)
+    if not mymodel:
+        return None
+
+    return mymodel
 
 
-def advance(state: model.Model, max_steps: int = 10) -> model.Model:
+def get_model(digit: int, *, max_value: int = 9999, max_cost: int = 2) -> model.Model | None:
+    """
+    Obtain an initial model.
+
+    """
+    __logger.debug(f"get_model(digit={digit}, max_value={max_value}, max_cost={max_cost})")
+    # Build a blank model
+    mymodel = model.Model(digit=digit)
+
+    if not mymodel:
+        __logger.error("unable to build a model")
+        return None
+
+    # Adjust parameters and add initial values (in case they do not exist there already)
+    mymodel.seed(max_value=max_value, max_cost=max_cost)
+
+    return mymodel
+
+
+def advance(mymodel: model.Model, max_steps: int = 10) -> model.Model:
     """
     Perform iterations over a onedigit model.
 
@@ -40,20 +61,19 @@ def advance(state: model.Model, max_steps: int = 10) -> model.Model:
     if there is no change in state after an iteration.
 
     Args:
-        state (model.Model): initial state for the simulation.
+        mymodel (model.Model): model at the begining of the simulation.
         max_steps (int): maximum number of steps (iterations) to run. Defaults to 10.
 
     Returns:
         model.Model: reference to the updated model.
     """
-
-    __logger.debug(f"simple.advance(state={state}, max_steps={max_steps})")
+    __logger.debug(f"simple.advance(mymodel={mymodel}, max_steps={max_steps})")
 
     # Run a few steps
     for step in range(1, max_steps + 1):
-        updates = state.simulate()
+        updates = mymodel.simulate()
         if updates == 0:
             __logger.info(f"stopping early as state does not advance past {step} iterations.")
             break
 
-    return state
+    return mymodel

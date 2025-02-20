@@ -22,7 +22,11 @@ class Test_Model(unittest.TestCase):
         # Verify integrity of the Model object
         assert isinstance(model.digit, int)
         assert model.digit == digit
+        assert 1 <= model.digit <= 9
 
+        self.check_model_state(model, digit)
+
+    def check_model_state(self, model: onedigit.Model, digit: int):
         assert isinstance(model.state, dict)
         assert len(model.state) > 0
 
@@ -35,19 +39,21 @@ class Test_Model(unittest.TestCase):
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_creation_good(self, digit: int):
         # Good digit
-        model1 = onedigit.Model(digit=digit, max_value=99, max_cost=4)
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=99, max_cost=4)
         self.check_model(model1, digit)
 
     @given(digit=hst.integers(min_value=10))
     def test_model_creation_bad(self, digit: int):
         # Bad digit
         with self.assertRaises(expected_exception=ValueError):
-            model1 = onedigit.Model(digit=digit, max_value=99, max_cost=4)
+            model1 = onedigit.Model(digit=digit)
 
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_initial_population(self, digit: int):
         # Create a fresh model. Active values of up to 3 digits (999).
-        model1 = onedigit.Model(digit=digit, max_value=999, max_cost=4)
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=999, max_cost=4)
         self.check_model(model1, digit)
 
         # Model needs to have some initial values, for the digit, and each of the concatenations
@@ -67,7 +73,8 @@ class Test_Model(unittest.TestCase):
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_update(self, digit: int):
         # Create a fresh model
-        model1 = onedigit.Model(digit=digit, max_value=99, max_cost=4)
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=99, max_cost=4)
 
         # Get 1 combination that exists in a fresh model
         combo1 = model1.state[digit]
@@ -96,7 +103,8 @@ class Test_Model(unittest.TestCase):
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_copy_basic(self, digit: int):
         # Create a fresh model and get one combination from it
-        model1 = onedigit.Model(digit=digit, max_value=99, max_cost=4)
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=99, max_cost=4)
         combo1 = model1.state[digit]
 
         # add one extra combination (value = digit + digit)
@@ -116,7 +124,8 @@ class Test_Model(unittest.TestCase):
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_copy(self, digit: int):
         # Create a model, copy it, but keep the original too
-        model1 = onedigit.Model(digit=digit, max_value=99, max_cost=4)
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=99, max_cost=4)
         model2 = model1.copy()
 
         # Verify integrity of the copy
@@ -141,7 +150,8 @@ class Test_Model(unittest.TestCase):
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_to_dictionary(self, digit: int):
         # Create the dictionary of a model
-        model1 = onedigit.Model(digit=digit, max_value=99, max_cost=4)
+        model1 = onedigit.Model(digit=digit)
+        model1.seed(max_value=99, max_cost=4)
         dict1 = model1.asdict()
 
         # Verify dictionary

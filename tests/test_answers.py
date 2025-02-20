@@ -15,9 +15,10 @@ class TestAnswers(unittest.TestCase):
     )
 
     def test_answers(self, digit: int, max_value: int, max_cost: int, max_steps: int) -> None:
-        model = onedigit.Model(digit=digit, max_value=max_value, max_cost=max_cost)
+        model = onedigit.Model(digit=digit)
         assert model is not None
-        onedigit.advance(state=model, max_steps=max_steps)
+        model.seed(max_value=max_value, max_cost=max_cost)
+        onedigit.advance(mymodel=model, max_steps=max_steps)
 
         for combo in model.get_valid_combos():
             val, cost = combo.value, combo.cost
