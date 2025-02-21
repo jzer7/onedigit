@@ -79,19 +79,21 @@ To get past the first limitation, I will also allow the use of the number `1` at
 
 ## Usage
 
-The script `calculate.py` is a CLI to the solver.
+The script `onedigit` is a CLI to the solver.
 The syntax is:
 
 ```txt
-calculate.py [OPTIONS]
+onedigit [OPTIONS]
 
 Options:
-  --digit <number>          digit to use for expressions
-  --upper <number>          largest number to report
-  --steps <number>          number of iterations
-  --full                    show combinations in terms of the digit, otherwise use expanded values
-  --format <text | json>    format for the output
-  --help                    this information
+  --digit <number>              digit to use for expressions
+  --max_value <number>          largest number to report
+  --max_steps <number>          number of iterations
+  --max_cost <number>           largest cost for an expression to be used
+  --full                        show combinations in terms of the digit, otherwise use expanded values
+  --input_filename <filename>   import a JSON file that describes the model
+  --output_filename <filename>  name of a JSON used for the output, an automatic name would be used otherwise.
+  --help                        this information
 ```
 
 ### Examples
@@ -99,21 +101,21 @@ Options:
 The simplest use is to get combinations using the digit `3`.
 
 ```sh
-python3 calculate.py --digit 3
+onedigit --digit 3
 ```
 
 To see the default values:
 
 ```sh
-python3 calculate.py --help
+onedigit --help
 ```
 
 The JSON format is helpful as we can use [jq](https://jqlang.github.io/jq/) to run queries on the output.
 For example, to generate all combinations with the digit `7` up to `100`, with a cost less than '3'.
 
-```
-python3 calculate.py --digit 7 --upper 100 --format json \
-  | jq '.[] | select(.cost <= 3) | {"value":.value, "expression":.expr}'
+```sh
+onedigit --digit 7 --max_value 100 --output_filename foo.json
+cat foo.json | jq '.[] | select(.cost <= 3) | {"value":.value, "expression":.expr_full}'
 ```
 
 木
