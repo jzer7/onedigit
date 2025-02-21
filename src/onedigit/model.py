@@ -1,12 +1,15 @@
-"""Single digit combo."""
+"""Single digit model and combination objects."""
 
 # Needed so classes can make self references to their type
 from __future__ import annotations
 
 import dataclasses
-import logging
 import math
 from typing import Any, Dict, List
+
+from onedigit import main_logger
+
+logger = main_logger.getChild("model")
 
 
 @dataclasses.dataclass
@@ -247,7 +250,6 @@ class Model:
     max_value: int = 0
     max_cost: int = 0
     state: Dict[int, Combo]
-    logger: logging.Logger
 
     def __init__(self, digit):
         """
@@ -259,9 +261,7 @@ class Model:
             ValueError: if digit value is out of range [1,9]
         """
 
-        self.logger = logging.getLogger("model")
-        self.logger.setLevel(logging.INFO)
-        self.logger.debug("Model.__init__()")
+        logger.debug("Model.__init__()")
 
         if not isinstance(digit, int) or not (1 <= digit <= 9):
             raise ValueError("digit must be an integer between 1 and 9, inclusive.")
@@ -315,7 +315,6 @@ class Model:
         new_model.max_value = self.max_value
         new_model.max_cost = self.max_cost
         new_model.state = self.state.copy()
-        new_model.logger = self.logger
         return new_model
 
     @classmethod
@@ -373,8 +372,7 @@ class Model:
         Returns:
             bool: True if the update was valid.
         """
-
-        self.logger.debug("Model.state_update()")
+        # logger.debug("Model.state_update()")
 
         if candidate.cost > self.max_cost:
             return False
@@ -403,7 +401,7 @@ class Model:
             extra (Model): model with combinations to be added to this model
         """
 
-        self.logger.debug("Model.state_merge()")
+        logger.debug("Model.state_merge()")
 
         for combo2 in extra.get_valid_combos():
             val2, cost2 = combo2.value, combo2.cost

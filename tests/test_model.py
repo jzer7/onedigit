@@ -8,7 +8,7 @@ import onedigit
 #     digit: int
 #     max_value: int
 #     max_cost: int
-#     state: Dict[int, Combo]
+#     state: dict[int, Combo]
 #     logger: logging.Logger
 #     def __init__(self, digit: int, max_value: int, max_cost: int, *, shallow: bool = False): ...
 

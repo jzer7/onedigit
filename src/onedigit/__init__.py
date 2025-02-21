@@ -9,8 +9,9 @@ from onedigit.info import (  # noqa: F401
     __url__,
     __bugtrack_url__,
 )
-from onedigit.main import calculate as main
+from onedigit.logger import main_logger
 from onedigit.model import Combo, Model
 from onedigit.simple import advance, calculate, get_model
+from onedigit.cli import main
 
-__all__ = ["Combo", "Model", "advance", "calculate", "get_model", "main"]
+__all__ = ["Combo", "Model", "advance", "calculate", "get_model", "main_logger", "main"]

@@ -173,4 +173,7 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
-model.*.json
+# Artifacts created by this package
+model*.json
+*.log
+*.log.*
