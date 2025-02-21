@@ -14,7 +14,7 @@ import onedigit
 
 
 class Test_Model(unittest.TestCase):
-    def check_model(self, model: onedigit.Model, digit: int):
+    def check_model(self, model: onedigit.Model, digit: int) -> None:
         # Verify integrity of the object
         assert model is not None
         assert isinstance(model, onedigit.Model)
@@ -26,7 +26,7 @@ class Test_Model(unittest.TestCase):
 
         self.check_model_state(model, digit)
 
-    def check_model_state(self, model: onedigit.Model, digit: int):
+    def check_model_state(self, model: onedigit.Model, digit: int) -> None:
         assert isinstance(model.state, dict)
         assert len(model.state) > 0
 
@@ -36,7 +36,7 @@ class Test_Model(unittest.TestCase):
         assert isinstance(model.state[digit], onedigit.Combo)
         assert model.state[digit].value == digit
 
-    def model_match(self, model1: onedigit.Model, model2: onedigit.Model):
+    def model_match(self, model1: onedigit.Model, model2: onedigit.Model) -> bool:
         # But models should be from the same digit space
         assert model1.digit == model2.digit
 
@@ -47,20 +47,20 @@ class Test_Model(unittest.TestCase):
         return False
 
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_creation_good(self, digit: int):
+    def test_model_creation_good(self, digit: int) -> None:
         # Good digit
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=99, max_cost=4)
         self.check_model(model1, digit)
 
     @given(digit=hst.integers(min_value=10))
-    def test_model_creation_bad(self, digit: int):
+    def test_model_creation_bad(self, digit: int) -> None:
         # Bad digit
         with self.assertRaises(expected_exception=ValueError):
             model1 = onedigit.Model(digit=digit)
 
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_initial_population(self, digit: int):
+    def test_model_initial_population(self, digit: int) -> None:
         # Create a fresh model. Active values of up to 3 digits (999).
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=999, max_cost=4)
@@ -81,7 +81,7 @@ class Test_Model(unittest.TestCase):
             assert c.cost == len(digits)
 
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_update(self, digit: int):
+    def test_model_update(self, digit: int) -> None:
         # Create a fresh model
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=99, max_cost=4)
@@ -111,7 +111,7 @@ class Test_Model(unittest.TestCase):
         assert (3 * digit) in model1.state
 
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_copy_basic(self, digit: int):
+    def test_model_copy_basic(self, digit: int) -> None:
         # Create a fresh model and get one combination from it
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=99, max_cost=4)
@@ -133,7 +133,7 @@ class Test_Model(unittest.TestCase):
         assert (digit + digit) in model2.state
 
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_copy(self, digit: int):
+    def test_model_copy(self, digit: int) -> None:
         # Create a model, copy it, but keep the original too
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=99, max_cost=4)
@@ -159,7 +159,7 @@ class Test_Model(unittest.TestCase):
 
     # For serialization
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_to_dictionary(self, digit: int):
+    def test_model_to_dictionary(self, digit: int) -> None:
         # Create the dictionary of a model
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=99, max_cost=4)
@@ -183,7 +183,7 @@ class Test_Model(unittest.TestCase):
         assert len(dict1["combinations"]) >= 1
 
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_from_dictionary_basic(self, digit: int):
+    def test_model_from_dictionary_basic(self, digit: int) -> None:
         # Create the dictionary of a model
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=99, max_cost=4)
@@ -200,7 +200,7 @@ class Test_Model(unittest.TestCase):
         self.check_model(model2, digit)
 
     @given(digit=hst.integers(min_value=1, max_value=9))
-    def test_model_from_dictionary(self, digit: int):
+    def test_model_from_dictionary(self, digit: int) -> None:
         # Create the dictionary of a model
         model1 = onedigit.Model(digit=digit)
         model1.seed(max_value=99, max_cost=4)

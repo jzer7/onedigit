@@ -13,7 +13,7 @@ import onedigit
 
 
 class Test_Combo(unittest.TestCase):
-    def check_expression(self, expr: str, expect: int):
+    def check_expression(self, expr: str, expect: int) -> None:
         # Expression must evaluate to the expected value
 
         # Handle integer exponentiation
@@ -30,7 +30,7 @@ class Test_Combo(unittest.TestCase):
 
         assert result == expect
 
-    def check_combo(self, combo1: onedigit.Combo, value1: int):
+    def check_combo(self, combo1: onedigit.Combo, value1: int) -> None:
         # Verify integrity of the object
         assert combo1.value == value1
         assert combo1.cost > 1000
@@ -38,13 +38,13 @@ class Test_Combo(unittest.TestCase):
         self.check_expression(combo1.expr_simple, value1)
 
     @given(value1=hst.integers())
-    def test_combo_positional(self, value1: int):
+    def test_combo_positional(self, value1: int) -> None:
         combo1 = onedigit.Combo(value1)
         self.check_combo(combo1, value1)
 
     # For serialization
     @given(value=hst.integers(min_value=1), cost=hst.integers(min_value=1))
-    def test_combo_to_dictionary(self, value: int, cost: int):
+    def test_combo_to_dictionary(self, value: int, cost: int) -> None:
         # Create a simple combo, and get its dictionary
         combo1 = onedigit.Combo(value=value, cost=cost, expr_full=str(value), expr_simple=str(value))
         dict1 = combo1.asdict()
@@ -71,13 +71,13 @@ class Test_Combo(unittest.TestCase):
         assert dict1["expr_simple"] == str(value)
 
     @given(value1=hst.integers())
-    def test_combo_repr(self, value1: int):
+    def test_combo_repr(self, value1: int) -> None:
         combo1 = onedigit.Combo(value1)
 
         str1 = str(combo1)
 
     @given(value1=hst.integers(), value2=hst.integers())
-    def test_combo_ordering(self, value1: int, value2: int):
+    def test_combo_ordering(self, value1: int, value2: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(value2)
 
@@ -94,7 +94,7 @@ class Test_Combo(unittest.TestCase):
             assert not (combo1 > combo2)
 
     @given(value1=hst.integers(), value2=hst.integers())
-    def test_combo_addition(self, value1: int, value2: int):
+    def test_combo_addition(self, value1: int, value2: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(value2)
 
@@ -105,7 +105,7 @@ class Test_Combo(unittest.TestCase):
         self.check_combo(combo4, value2 + value1)
 
     @given(value1=hst.integers(), value2=hst.integers())
-    def test_combo_subtraction(self, value1: int, value2: int):
+    def test_combo_subtraction(self, value1: int, value2: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(value2)
 
@@ -116,7 +116,7 @@ class Test_Combo(unittest.TestCase):
         self.check_combo(combo4, value2 - value1)
 
     @given(value1=hst.integers(), value2=hst.integers())
-    def test_combo_multiplication(self, value1: int, value2: int):
+    def test_combo_multiplication(self, value1: int, value2: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(value2)
 
@@ -127,7 +127,7 @@ class Test_Combo(unittest.TestCase):
         self.check_combo(combo4, value2 * value1)
 
     @given(value1=hst.integers())
-    def test_combo_integer_division_by_zero(self, value1: int):
+    def test_combo_integer_division_by_zero(self, value1: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(0)
 
@@ -135,7 +135,7 @@ class Test_Combo(unittest.TestCase):
             combo3 = combo1.binary_operation(combo2, "/")
 
     @given(value1=hst.integers(min_value=1))
-    def test_combo_integer_division_by_one(self, value1: int):
+    def test_combo_integer_division_by_one(self, value1: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(value1)
 
@@ -146,7 +146,7 @@ class Test_Combo(unittest.TestCase):
         self.check_combo(combo4, 1)
 
     @given(value1=hst.integers(min_value=1), value2=hst.integers(min_value=1))
-    def test_combo_integer_division(self, value1: int, value2: int):
+    def test_combo_integer_division(self, value1: int, value2: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(value2)
 
@@ -164,7 +164,7 @@ class Test_Combo(unittest.TestCase):
             self.check_combo(combo4, 0)
 
     @given(value1=hst.integers(min_value=1), value2=hst.integers(max_value=50))
-    def test_combo_integer_exponentiation(self, value1: int, value2: int):
+    def test_combo_integer_exponentiation(self, value1: int, value2: int) -> None:
         combo1 = onedigit.Combo(value1)
         combo2 = onedigit.Combo(value2)
 
@@ -180,7 +180,7 @@ class Test_Combo(unittest.TestCase):
         self.check_combo(combo3, (value1**value2))
 
     @given(value1=hst.integers())
-    def test_combo_sqrt(self, value1: int):
+    def test_combo_sqrt(self, value1: int) -> None:
         combo1 = onedigit.Combo(value1)
 
         combo2 = combo1.unary_operation("sqrt")
@@ -198,7 +198,7 @@ class Test_Combo(unittest.TestCase):
         self.check_combo(combo2, expected1)
 
     @given(value1=hst.integers(max_value=50))
-    def test_combo_factorial(self, value1: int):
+    def test_combo_factorial(self, value1: int) -> None:
         combo1 = onedigit.Combo(value1)
 
         combo2 = combo1.unary_operation("!")

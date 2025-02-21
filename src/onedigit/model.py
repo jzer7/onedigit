@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from typing import Any, Dict, List
+from typing import Any, List
 
 from onedigit import main_logger
 
@@ -31,7 +31,7 @@ class Combo:
     expr_full: str = ""  # (set to str(value) if empty)
     expr_simple: str = ""  # (set to str(value) if empty)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Run after instantiation of a dataclass object."""
         if self.cost == 0:
             self.cost = 10**9
@@ -66,7 +66,7 @@ class Combo:
         return self.value < other.value
 
     @classmethod
-    def fromdict(cls, input: dict) -> Combo:
+    def fromdict(cls, input: dict[str, Any]) -> Combo:
         """Create a Combo object from a dictionary.
 
         Functions to export an Model to a dictionary, and to create an
@@ -249,9 +249,9 @@ class Model:
     digit: int
     max_value: int = 0
     max_cost: int = 0
-    state: Dict[int, Combo]
+    state: dict[int, Combo]
 
-    def __init__(self, digit):
+    def __init__(self, digit: int) -> None:
         """
         Build a model for the game simulation.
 
@@ -318,7 +318,7 @@ class Model:
         return new_model
 
     @classmethod
-    def fromdict(cls, input: dict) -> Model:
+    def fromdict(cls, input: dict[str, Any]) -> Model:
         """Create a Model object from a dictionary.
 
         Functions to export an Model to a dictionary, and to create an
@@ -452,7 +452,7 @@ class Model:
 
                 # We need to run both cases (combo1 > combo2, and combo2 > combo1)
                 #   ^
-                for op in "^":
+                for op in ["^"]:
                     updates += new_combos.state_update(combo1.binary_operation(combo2, op))
 
         self.state_merge(new_combos)
