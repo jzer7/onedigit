@@ -160,7 +160,7 @@ class Combo:
                     return Combo(value=0)
                 rc_val = math.factorial(self.value)
                 rc_expr_full = value1_expr_full + "!"
-                rc_expr_simple = str(rc_val) + "!"
+                rc_expr_simple = str(self.value) + "!"
             case "sqrt":
                 if self.value < 0:
                     # Prevent irrational values
