@@ -76,6 +76,8 @@ class Test_Combo(unittest.TestCase):
 
         str1 = str(combo1)
 
+        assert str1
+
     @given(value1=hst.integers(), value2=hst.integers())
     def test_combo_ordering(self, value1: int, value2: int) -> None:
         combo1 = onedigit.Combo(value1)
@@ -133,6 +135,7 @@ class Test_Combo(unittest.TestCase):
 
         with self.assertRaises(expected_exception=ZeroDivisionError):
             combo3 = combo1.binary_operation(combo2, "/")
+            assert combo3.value == 0
 
     @given(value1=hst.integers(min_value=1))
     def test_combo_integer_division_by_one(self, value1: int) -> None:

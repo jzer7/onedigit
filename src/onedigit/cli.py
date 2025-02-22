@@ -6,7 +6,7 @@ import json
 
 import onedigit
 
-logger = onedigit.main_logger.getChild("cli")
+logger = onedigit.get_logger(__name__)
 
 
 def main(

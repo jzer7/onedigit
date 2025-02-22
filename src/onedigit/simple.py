@@ -4,7 +4,7 @@ import json
 
 import onedigit
 
-logger = onedigit.main_logger.getChild("simple")
+logger = onedigit.get_logger(__name__)
 
 
 def calculate(
@@ -15,7 +15,7 @@ def calculate(
 
     Args:
         digit (int): digit to use
-        max_number (int, optional): largest value to remember. Defaults to 9999.
+        max_value (int, optional): largest value to remember. Defaults to 9999.
         max_cost (int, optional): maximum cost a combination can have to be remembered. Defaults to 10.
         max_steps (int, optional): maximum number of steps (iterations) to run. Defaults to 10.
         input_json (str, optional): JSON model data. Defaults to empty.
@@ -44,6 +44,10 @@ def get_model(digit: int, *, max_value: int = 9999, max_cost: int = 2, input_jso
     Otherwise a fresh model is created.
 
     Args:
+        digit (int): digit to use
+        max_value (int, optional): largest value to remember. Defaults to 9999.
+        max_cost (int, optional): maximum cost a combination can have to be remembered. Defaults to 10.
+        input_json (str, optional): JSON text that represents a model. Defaults to empty.
 
     Returns:
         onedigit.Model: a model, or None.

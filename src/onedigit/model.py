@@ -7,9 +7,9 @@ import dataclasses
 import math
 from typing import Any, List
 
-from onedigit import main_logger
+import onedigit
 
-logger = main_logger.getChild("model")
+logger = onedigit.get_logger(__name__)
 
 
 @dataclasses.dataclass
@@ -67,7 +67,8 @@ class Combo:
 
     @classmethod
     def fromdict(cls, input: dict[str, Any]) -> Combo:
-        """Create a Combo object from a dictionary.
+        """
+        Create a Combo object from a dictionary.
 
         Functions to export an Model to a dictionary, and to create an
         object from a dictionary are used during object serialization. That
@@ -77,7 +78,7 @@ class Combo:
             input (dict): dictionary representation of the object
 
         Raises:
-            ValueError: _description_
+            ValueError: when the input dictionary is not valid.
         """
         # Keys with integer values
         for k in ["value", "cost"]:
@@ -128,13 +129,26 @@ class Combo:
         Args:
             op (str): operation to run (!, sqrt).
 
+        Note:
+            To avoid inmensely large operations, the factorial
+            operation only works on numbers up to '20'.
+
+                20! is 62-bits (~2 x 10^18)
+                21! is 66-bits
+                24! is 80-bits
+                30! is 108-bits
+                34! is 128-bits
+
+            Since this is a legitimate operation, it will not
+            raise an exception. Instead i will return an empty
+            combination.
+
         Raises:
             ValueError: when receiving an invalid operation
 
         Returns:
             Combo: a new Combo object.
         """
-
         # Only use parenthesis for cases it helps (if expression has spaces)
         value1_expr_full = self.expr_full
         if " " in value1_expr_full:
@@ -143,13 +157,6 @@ class Combo:
         match op:
             case "!":
                 if (self.value < 0) or (self.value > 20):
-                    # FIXME: This is an opaque value. See how to clean this up.
-                    # Prevent illogical or gigantic values in calculations
-                    # Value: 20! is 2x10^18 ,  62-bits
-                    #        21! is         ,  66-bits
-                    #        24! is         ,  80-bits
-                    #        30! is         , 108-bits
-                    #        34! is         , 128-bits
                     return Combo(value=0)
                 rc_val = math.factorial(self.value)
                 rc_expr_full = value1_expr_full + "!"
@@ -185,13 +192,23 @@ class Combo:
                 Operations supported: addition(+), subtraction(-),
                 multiplication(*), integer division(/), exponentiation(^)
 
+        Note:
+            To avoid inmensely large operations, the exponent in the
+            exponentiation operation is limited to '40'.
+
+                9^20 is 64-bits (~1.2 x 10^19)
+                9^40 is 127-bits (~1.4 x 10^38)
+
+            Since this is a legitimate operation, it will not
+            raise an exception. Instead i will return an empty
+            combination.
+
         Raises:
             ValueError: when receiving an invalid operation
 
         Returns:
             Combo: the result of the operation, as a new Combo object.
         """
-
         cost = self.cost + combo2.cost
 
         # Only use parenthesis for cases it helps (if expression has spaces)
@@ -226,10 +243,6 @@ class Combo:
                 rc_expr_simple = f"{self.value} / {combo2.value}"
 
             case "^":
-                # FIXME: This is an opaque value. See how to clean this up.
-                # Prevent illogical or gigantic values in calculations
-                # Value: 9^20 is 1.2x10^19,  64-bits
-                #        9^40 is 1.4x10^38, 127-bits
                 if self.value < 0 or combo2.value > 40:
                     return Combo(value=0)
 
@@ -257,10 +270,10 @@ class Model:
 
         Args:
             digit (int): digit to use when creating expresions
+
         Raises:
             ValueError: if digit value is out of range [1,9]
         """
-
         logger.debug("Model.__init__()")
 
         if not isinstance(digit, int) or not (1 <= digit <= 9):
@@ -271,12 +284,15 @@ class Model:
 
     def seed(self, *, max_value: int = 0, max_cost: int = 0) -> None:
         """
+        Create initial combinations for the model.
+
         Args:
             max_value (int, optional): upper limit of values the model
                 retains.
             max_cost (int, optional): maximum cost a combination can
                 have, for the simulation to use it to generate other
                 combinations.
+
         Raises:
             ValueError: if max value is too large (more than 1M).
         """
@@ -300,7 +316,8 @@ class Model:
                 num, expr, cost = 10 * num + self.digit, expr + str(self.digit), cost + 1
 
     def copy(self) -> Model:
-        """Create a new object with all information about this model.
+        """
+        Create a new object with all information about this model.
 
         This function is used as a way to create a snapshot. When called
         a blank Model object is created, and data from the current object
@@ -319,7 +336,8 @@ class Model:
 
     @classmethod
     def fromdict(cls, input: dict[str, Any]) -> Model:
-        """Create a Model object from a dictionary.
+        """
+        Create a Model object from a dictionary.
 
         Functions to export an Model to a dictionary, and to create an
         object from a dictionary are used during object serialization. That
@@ -329,7 +347,7 @@ class Model:
             input (dict): dictionary representation of the object
 
         Raises:
-            ValueError: _description_
+            ValueError: when the input dictionary is not valid.
         """
         for k in ["digit", "max_value", "max_cost", "combinations"]:
             if k not in input:
@@ -400,7 +418,6 @@ class Model:
         Args:
             extra (Model): model with combinations to be added to this model
         """
-
         logger.debug("Model.state_merge()")
 
         for combo2 in extra.get_valid_combos():
@@ -427,7 +444,6 @@ class Model:
         Returns:
             int: number of values that were updated
         """
-
         known = list(self.state.values())
         known.sort(key=lambda c: c.value)
         new_combos = self.copy()

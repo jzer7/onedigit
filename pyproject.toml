@@ -22,29 +22,39 @@ license = {text = "MIT"}
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
-
-[tool.coverage.run]
-
-[tool.coverage.report]
-
 [tool.coverage.html]
 directory = "coverage_html_report"
 
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
 [tool.pdm]
+
+[tool.pdm.scripts]
+format = { composite = ["ruff format onedigit src tests"], help = "use Ruff to lint all Python files in the directory" }
+test = { composite = ["pytest --cov", "coverage"], help = "tests and coverage report" }
+_check_mypy = { cmd = "mypy onedigit src tests", help = "static type checking" }
+_check_ruff = { cmd = "ruff check onedigit src tests", help = "static check" }
+_check_bandit = { cmd = "bandit -r onedigit src tests", help = "static security check" }
+check = { composite = ["_check_ruff", "_check_mypy", "_check_bandit"], help = "static checks on the codebase" }
+todo = { cmd = "grep -E '# *(HACK|TODO|FIXME|BUG)' -R onedigit src tests", help = "pending work" }
+all = {composite = ["format", "test", "check"], help = "protect against small things before a commit" }
 
 [tool.pdm.version]
 source = "file"
 path = "src/onedigit/info.py"
 
-
 [tool.ruff]
 line-length = 120
 
-[tool.mypy]
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
-warn_redundant_casts = true
-warn_unused_ignores = true
+[tool.ruff.lint]
+
+[tool.ruff.lint.pydocstyle]
 
 [dependency-groups]
 lint = [
@@ -52,6 +62,7 @@ lint = [
     "ruff>=0.8.4",
 ]
 test = [
+    "bandit[toml]>=1.8.3",
     "hypothesis[cli]>=6.123.15",
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",

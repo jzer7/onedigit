@@ -58,6 +58,7 @@ class Test_Model(unittest.TestCase):
         # Bad digit
         with self.assertRaises(expected_exception=ValueError):
             model1 = onedigit.Model(digit=digit)
+            assert not model1
 
     @given(digit=hst.integers(min_value=1, max_value=9))
     def test_model_initial_population(self, digit: int) -> None:

@@ -1,4 +1,3 @@
-import math
 import unittest
 
 from hypothesis import given, strategies as hst
@@ -29,3 +28,7 @@ class TestAnswers(unittest.TestCase):
 
             # Ensure upper value was respected
             assert val <= max_value
+
+            assert expr_simple
+
+            assert expr_full

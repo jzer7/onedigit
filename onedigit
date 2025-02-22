@@ -3,8 +3,8 @@
 import re
 import sys
 import fire
-import onedigit
+from onedigit import main
 
 if __name__ == "__main__":
     sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])
-    sys.exit(fire.Fire(onedigit.main))
+    sys.exit(fire.Fire(main))
