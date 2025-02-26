@@ -62,7 +62,8 @@ class Combo:
         Returns:
             bool: True if this combination has a lower value compared to the 'other' combination.
         """
-        assert isinstance(other, Combo)
+        if not isinstance(other, Combo):
+            raise ValueError(f"Combo '__lt__' is undefined for type{type(other)}.")
         return self.value < other.value
 
     @classmethod

@@ -1,6 +1,7 @@
 import unittest
 
-from hypothesis import given, strategies as hst
+from hypothesis import given
+from hypothesis import strategies as hst
 
 import onedigit
 

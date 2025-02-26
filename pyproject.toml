@@ -3,7 +3,7 @@ name = "onedigit"
 dynamic = ["version"]
 description = "Onedigit arithmetic puzzle"
 authors = [
-    {name = "Juan Rubio", email = "jcrubio@gmail.com"},
+    { name = "Juan Rubio", email = "jcrubio@gmail.com" },
 ]
 keywords = [
     "arithmetic-game",
@@ -15,44 +15,76 @@ dependencies = [
 ]
 requires-python = ">=3.13"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Private :: Do Not Upload",
+    "Topic :: Games/Entertainment :: Puzzle Games",
+]
 
 
 [build-system]
-requires = ["pdm-backend"]
+requires      = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
 
 [tool.coverage.html]
 directory = "coverage_html_report"
 
 [tool.mypy]
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
-warn_redundant_casts = true
-warn_unused_ignores = true
+check_untyped_defs          = true
+disallow_any_generics       = true
+disallow_any_unimported     = true # To offset someone having 'ignore_missing_imports'
+disallow_incomplete_defs    = true
+disallow_untyped_decorators = true
+disallow_untyped_defs       = true # TOP
+no_implicit_optional        = true
+show_error_codes            = true
+warn_redundant_casts        = true
+warn_return_any             = true
+warn_unused_ignores         = true
 
 [tool.pdm]
 
 [tool.pdm.scripts]
-format = { composite = ["ruff format onedigit src tests"], help = "use Ruff to lint all Python files in the directory" }
-test = { composite = ["pytest --cov", "coverage"], help = "tests and coverage report" }
+_format_py = { cmd = "ruff format onedigit src tests" }
+format = { composite = [
+    "_format_py",
+], help = "format source files" }
+test = { composite = [
+    "pytest --cov",
+    "coverage",
+], help = "tests and coverage report" }
 _check_mypy = { cmd = "mypy onedigit src tests", help = "static type checking" }
 _check_ruff = { cmd = "ruff check onedigit src tests", help = "static check" }
-_check_bandit = { cmd = "bandit -r onedigit src tests", help = "static security check" }
-check = { composite = ["_check_ruff", "_check_mypy", "_check_bandit"], help = "static checks on the codebase" }
+_check_bandit = { cmd = "bandit -c pyproject.toml -q -r onedigit src tests", help = "static security check" }
+check = { composite = [
+    "_check_ruff",
+    "_check_mypy",
+    "_check_bandit",
+], help = "static checks on the codebase" }
 todo = { cmd = "grep -E '# *(HACK|TODO|FIXME|BUG)' -R onedigit src tests", help = "pending work" }
-all = {composite = ["format", "test", "check"], help = "protect against small things before a commit" }
+all = { composite = [
+    "format",
+    "test",
+    "check",
+], help = "protect against small things before a commit" }
 
 [tool.pdm.version]
 source = "file"
-path = "src/onedigit/info.py"
+path   = "src/onedigit/info.py"
 
 [tool.ruff]
 line-length = 120
 
 [tool.ruff.lint]
+extend-select = [
+    "I", # isort
+    "W", # pycodestyle
+]
 
 [tool.ruff.lint.pydocstyle]
 

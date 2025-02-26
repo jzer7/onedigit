@@ -1,6 +1,6 @@
-"""Package to calculate combinations to form a number out of a algebraic operations using a single digit."""
+"""Evaluate expressions that use a single digit from 1 to 9, and basic arithmetic operations."""
 
-from onedigit.info import (  # noqa: F401
+from onedigit.info import (  # noqa: F401 I001
     __author__,
     __maintainer__,
     __email__,
