@@ -6,7 +6,7 @@ on:
 
 jobs:
   Testing:
-    name: Test package installation
+    name: Test package 
     strategy:
       fail-fast: false
       matrix:
@@ -29,13 +29,13 @@ jobs:
           python-version-file: pyproject.toml
           cache: true
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: pdm install
 
-      - name: Analysing the code with Ruff
+      - name: Code static analysis (Ruff)
         run: |
           pdm run check
 
-      - name: Run tests on codebase
+      - name: Run tests on codebase (pytest)
         run: |
-          pdm run tests
+          pdm run test
