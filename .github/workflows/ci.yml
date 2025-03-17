@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: pdm install
 
-      - name: Analysing the code with pylint
+      - name: Analysing the code with Ruff
         run: |
-          pylint $(git ls-files '*.py')
+          pdm run check
+
+      - name: Run tests on codebase
+        run: |
+          pdm run tests
