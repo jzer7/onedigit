@@ -1,0 +1,37 @@
+name: Continuous Integration Action
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  Testing:
+    name: Test package installation
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version-file: pyproject.toml
+          cache: true
+
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Analysing the code with pylint
+        run: |
+          pylint $(git ls-files '*.py')
